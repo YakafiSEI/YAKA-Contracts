@@ -1,3 +1,5 @@
+require("@nomicfoundation/hardhat-foundry");
+
 require("@nomiclabs/hardhat-waffle");
 
 require('@openzeppelin/hardhat-upgrades');
