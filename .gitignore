@@ -21,3 +21,7 @@ typechain-types/
 
 abi
 build
+
+lib/
+cache_forge/
+out/
