@@ -8,7 +8,7 @@
 // BaseV1Router02.sol : Supporting Fee-on-transfer Tokens
 // https://github.com/ftm1337/solidly-with-FoT/blob/master/contracts/BaseV1-periphery.sol
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.20;
 
 
 interface IBaseV1Factory {
