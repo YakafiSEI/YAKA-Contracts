@@ -563,7 +563,7 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
             //isPair = false;
         }
 
-        // gov can create for any pool, even non-Thena pairs
+        // gov can create for any pool, even non-YAKA pairs
         if (!IPermissionsRegistry(permissionRegistry).hasRole("GOVERNANCE",msg.sender)) { 
             require(isPair, "!_pool");
             require(isWhitelisted[tokenA] && isWhitelisted[tokenB], "!whitelisted");
@@ -571,11 +571,11 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
         // create internal and external bribe
-        address _owner = IPermissionsRegistry(permissionRegistry).thenaTeamMultisig();
-        string memory _type =  string.concat("Thena LP Fees: ", IERC20(_pool).symbol() );
+        address _owner = IPermissionsRegistry(permissionRegistry).yakaTeamMultisig();
+        string memory _type =  string.concat("YAKA LP Fees: ", IERC20(_pool).symbol() );
         _internal_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
-        _type = string.concat("Thena Bribes: ", IERC20(_pool).symbol() );
+        _type = string.concat("YAKA Bribes: ", IERC20(_pool).symbol() );
         _external_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
         // create gauge
