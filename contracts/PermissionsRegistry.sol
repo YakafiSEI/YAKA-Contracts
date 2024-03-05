@@ -2,16 +2,16 @@
 pragma solidity 0.8.20;
 
 /*
-    This contract handles the accesses to the various Thena contracts.
+    This contract handles the accesses to the various yaka contracts.
 */
 
 contract PermissionsRegistry {
 
     /// @notice Control this contract. This is the main multisig 4/6
-    address public thenaMultisig;
+    address public yakaMultisig;
 
-    /// @notice This is the thena team multisig 2/2
-    address public thenaTeamMultisig;
+    /// @notice This is the yaka team multisig 2/2
+    address public yakaTeamMultisig;
 
     /// @notice Control emergency functions (set to multisig)
     address public emergencyCouncil;
@@ -31,14 +31,14 @@ contract PermissionsRegistry {
     event RoleSetFor(address indexed user, bytes indexed role);
     event RoleRemovedFor(address indexed user, bytes indexed role);
     event SetEmergencyCouncil(address indexed council);
-    event SetThenaTeamMultisig(address indexed multisig);
-    event SetThenaMultisig(address indexed multisig);
+    event SetYakaTeamMultisig(address indexed multisig);
+    event SetYakaMultisig(address indexed multisig);
 
 
 
     constructor() {
-        thenaTeamMultisig = msg.sender;
-        thenaMultisig = msg.sender;
+        yakaTeamMultisig = msg.sender;
+        yakaMultisig = msg.sender;
         emergencyCouncil = msg.sender;
 
 
@@ -62,8 +62,8 @@ contract PermissionsRegistry {
 
     }
 
-    modifier onlyThenaMultisig() {
-        require(msg.sender == thenaMultisig, "!thenaMultisig");
+    modifier onlyYakaMultisig() {
+        require(msg.sender == yakaMultisig, "!yakaMultisig");
         _;
     }
 
@@ -75,7 +75,7 @@ contract PermissionsRegistry {
 
     /// @notice add a new role
     /// @param  role    new role's string (eg role = "GAUGE_ADMIN")
-    function addRole(string memory role) external onlyThenaMultisig {
+    function addRole(string memory role) external onlyYakaMultisig {
         bytes memory _role = bytes(role);
         require(!_checkRole[_role], 'is a role');
         _checkRole[_role] = true;
@@ -85,7 +85,7 @@ contract PermissionsRegistry {
 
     /// @notice Remove a role
     /// @dev    set last one to i_th position then .pop()
-    function removeRole(string memory role) external onlyThenaMultisig {
+    function removeRole(string memory role) external onlyYakaMultisig {
         bytes memory _role = bytes(role);
         require(_checkRole[_role], 'not a role');
 
@@ -116,7 +116,7 @@ contract PermissionsRegistry {
 
     
     /// @notice Set a role for an address
-    function setRoleFor(address c, string memory role) external onlyThenaMultisig {
+    function setRoleFor(address c, string memory role) external onlyYakaMultisig {
         bytes memory _role = bytes(role);
         require(_checkRole[_role], 'not a role');
         require(!hasRole[_role][c], 'assigned');
@@ -132,7 +132,7 @@ contract PermissionsRegistry {
 
     
     /// @notice remove a role from an address
-    function removeRoleFrom(address c, string memory role) external onlyThenaMultisig {
+    function removeRoleFrom(address c, string memory role) external onlyYakaMultisig {
         bytes memory _role = bytes(role);
         require(_checkRole[_role], 'not a role');
         require(hasRole[_role][c], 'not assigned');
@@ -228,7 +228,7 @@ contract PermissionsRegistry {
     /// @notice set emergency counsil
     /// @param _new new address    
     function setEmergencyCouncil(address _new) external {
-        require(msg.sender == emergencyCouncil || msg.sender == thenaMultisig, "not allowed");
+        require(msg.sender == emergencyCouncil || msg.sender == yakaMultisig, "not allowed");
         require(_new != address(0), "addr0");
         require(_new != emergencyCouncil, "same emergencyCouncil");
         emergencyCouncil = _new;
@@ -237,28 +237,25 @@ contract PermissionsRegistry {
     }
 
 
-    /// @notice set thena team multisig
+    /// @notice set yaka team multisig
     /// @param _new new address    
-    function setThenaTeamMultisig(address _new) external {
-        require(msg.sender == thenaTeamMultisig, "not allowed");
+    function setYakaTeamMultisig(address _new) external {
+        require(msg.sender == yakaTeamMultisig, "not allowed");
         require(_new != address(0), "addr 0");
-        require(_new != thenaTeamMultisig, "same multisig");
-        thenaTeamMultisig = _new;
+        require(_new != yakaTeamMultisig, "same multisig");
+        yakaTeamMultisig = _new;
         
-        emit SetThenaTeamMultisig(_new);
+        emit SetYakaTeamMultisig(_new);
     }
 
-    /// @notice set thena multisig
+    /// @notice set yaka multisig
     /// @param _new new address    
-    function setThenaMultisig(address _new) external {
-        require(msg.sender == thenaMultisig, "not allowed");
+    function setYakaMultisig(address _new) external {
+        require(msg.sender == yakaMultisig, "not allowed");
         require(_new != address(0), "addr0");
-        require(_new != thenaMultisig, "same multisig");
-        thenaMultisig = _new;
+        require(_new != yakaMultisig, "same multisig");
+        yakaMultisig = _new;
         
-        emit SetThenaMultisig(_new);
+        emit SetYakaMultisig(_new);
     }
-    
-
-
 }
