@@ -815,14 +815,14 @@ abstract contract L2GovernorVotesQuorumFraction is L2GovernorVotes {
     }
 }
 
-contract ThenaGovernor is L2Governor, L2GovernorCountingSimple, L2GovernorVotes,  L2GovernorVotesQuorumFraction {
+contract YakaGovernor is L2Governor, L2GovernorCountingSimple, L2GovernorVotes,  L2GovernorVotesQuorumFraction {
     address public team;
     uint256 public constant MAX_PROPOSAL_NUMERATOR = 50; // max 5%
     uint256 public constant PROPOSAL_DENOMINATOR = 1000;
     uint256 public proposalNumerator = 2; // start at 0.02%
 
     // _quorum = 10 -> 10%
-    constructor(IVotes _ve, uint _quorum) L2Governor("Thena Governor") L2GovernorVotes(_ve) L2GovernorVotesQuorumFraction(_quorum) {
+    constructor(IVotes _ve, uint _quorum) L2Governor("YAKA Governor") L2GovernorVotes(_ve) L2GovernorVotesQuorumFraction(_quorum) {
         team = msg.sender;
     }
 
