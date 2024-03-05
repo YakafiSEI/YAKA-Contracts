@@ -88,7 +88,7 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
     uint internal tokenId;
 
     /// @notice Contract constructor
-    /// @param token_addr `THENA` token address
+    /// @param token_addr `YAKA` token address
     constructor(address token_addr, address art_proxy) {
         token = token_addr;
         voter = msg.sender;
@@ -127,8 +127,8 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
                              METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    string constant public name = "veThena";
-    string constant public symbol = "veTHE";
+    string constant public name = "veYAKA";
+    string constant public symbol = "veYAKA";
     string constant public version = "1.0.0";
     uint8 constant public decimals = 18;
 
