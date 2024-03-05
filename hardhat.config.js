@@ -1,11 +1,8 @@
 require("@nomicfoundation/hardhat-foundry");
-
+require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-waffle");
-
 require('@openzeppelin/hardhat-upgrades');
-
 require("@nomiclabs/hardhat-etherscan");
-
 require("@nomiclabs/hardhat-web3");
 
 const { PRIVATEKEY, APIKEY } = require("./pvkey.js")
