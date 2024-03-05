@@ -3,6 +3,6 @@ pragma solidity 0.8.20;
 
 interface IPermissionsRegistry {
     function emergencyCouncil() external view returns(address);
-    function thenaTeamMultisig() external view returns(address);
+    function yakaTeamMultisig() external view returns(address);
     function hasRole(bytes memory role, address caller) external view returns(bool);
 }
