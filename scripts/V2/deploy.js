@@ -2,7 +2,8 @@ const { ethers  } = require('hardhat');
 
 const { ZERO_ADDRESS } = require("@openzeppelin/test-helpers/src/constants.js");
 
-
+const path = "D:\\DaoProject\\YAKA-Contracts\\scripts\\contracts.json";
+const file_utils = require("../fileUtils");
 
 async function main () {
 
@@ -19,6 +20,7 @@ async function main () {
 
 
     console.log('Deploying Contracts...');
+    const contracts_deployed = file_utils.readData(path);
     
     
     // PERMISSION REGISTRY
@@ -26,6 +28,8 @@ async function main () {
     PermissionsRegistry = await data.deploy();
     txDeployed = await PermissionsRegistry.deployed();
     console.log("PermissionsRegistry: ", PermissionsRegistry.address)
+    contracts_deployed['PermissionsRegistry'] = PermissionsRegistry.address;
+    file_utils.saveData(path, contracts_deployed);
 
     // BRIBE FACTORY
     data = await ethers.getContractFactory("BribeFactoryV3");
@@ -33,6 +37,9 @@ async function main () {
     BribeFactoryV3 = await upgrades.deployProxy(data,input, {initializer: 'initialize'});
     txDeployed = await BribeFactoryV3.deployed();
     console.log("BribeFactoryV3: ", BribeFactoryV3.address)
+    contracts_deployed['BribeFactoryV3'] = BribeFactoryV3.address;
+    file_utils.saveData(path, contracts_deployed);
+
 
     // GAUGE FACTORY
     data = await ethers.getContractFactory("GaugeFactoryV2");
@@ -51,7 +58,7 @@ async function main () {
 
     // VOTER
     data = await ethers.getContractFactory("VoterV3");
-    input = [ve, pairFactory , GaugeFactoryV2.address,BribeFactoryV3.address]
+    input = [ve, pairFactory, GaugeFactoryV2.address, BribeFactoryV3.address]
     VoterV3 = await upgrades.deployProxy(data,input, {initializer: 'initialize'});
     txDeployed = await VoterV3.deployed();
     console.log("VoterV3: ", VoterV3.address)

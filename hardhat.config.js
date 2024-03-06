@@ -1,5 +1,5 @@
 require("@nomicfoundation/hardhat-foundry");
-require("@nomicfoundation/hardhat-toolbox");
+// require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-etherscan");
@@ -12,7 +12,7 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.8.13",
+        version: "0.8.20",
         settings: {
           optimizer: {
             enabled: true,
@@ -60,6 +60,18 @@ module.exports = {
           chainId: 56,
       },
       //accounts: []
+    },
+    sei_dev : {
+      url: "https://evm-rpc-arctic-1.sei-apis.com",
+      chainId: 713715,
+      accounts: PRIVATEKEY,
+      allowUnlimitedContractSize: true
+    },
+    sepolia : {
+      url: "https://eth-sepolia.g.alchemy.com/v2/BrzpjuiAd7D6jCuR3FXfB0LH_A5ClzsD",
+      chainId: 11155111,
+      accounts: PRIVATEKEY,
+      allowUnlimitedContractSize: true
     }
   
   },
@@ -72,6 +84,7 @@ module.exports = {
 
   mocha: {
     timeout: 100000000
-  }
+  },
+
 
 }

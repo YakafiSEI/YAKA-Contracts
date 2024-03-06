@@ -33,13 +33,6 @@ contract BribeFactoryV3 is OwnableUpgradeable {
     function initialize(address _voter, address _permissionsRegistry) initializer  public {
         __Ownable_init();   //after deploy ownership to multisig
         voter = _voter;
-        
-        //bribe default tokens
-        defaultRewardToken.push(address(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11));   // $the
-        defaultRewardToken.push(address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c));   // $wbnb
-        defaultRewardToken.push(address(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d));   // $usdc
-        defaultRewardToken.push(address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56));   // $busd
-        defaultRewardToken.push(address(0x55d398326f99059fF775485246999027B3197955));   // $usdt
 
         // registry to check accesses
         permissionsRegistry = IPermissionsRegistry(_permissionsRegistry);
@@ -94,6 +87,15 @@ contract BribeFactoryV3 is OwnableUpgradeable {
         require(owner() == msg.sender, 'not owner');
         require(_token != address(0));
         defaultRewardToken.push(_token);    
+    }
+
+    function pushDefaultRewardTokens(address[] memory _tokens) external {
+        require(owner() == msg.sender, 'not owner');
+        for(uint256 i = 0; i < _tokens.length; i++) {
+            if(_tokens[i] != address(0)) {
+                defaultRewardToken.push(_tokens[i]);
+            }
+        }
     }
 
     
