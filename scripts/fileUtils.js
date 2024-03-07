@@ -22,5 +22,6 @@ module.exports = {
             console.log(`write data error：${error}`);
             throw error;
         }
-    }
+    },
+    deployPath: "/Users/zhonggang/Project/YAKA-Contracts/scripts/contracts.json"
 }
