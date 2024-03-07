@@ -2,7 +2,6 @@ const { ethers  } = require('hardhat');
 
 const { ZERO_ADDRESS } = require("@openzeppelin/test-helpers/src/constants.js");
 
-const path = "D:\\DaoProject\\YAKA-Contracts\\scripts\\contracts.json";
 const file_utils = require("../fileUtils");
 
 async function main () {
@@ -20,7 +19,7 @@ async function main () {
 
 
     console.log('Deploying Contracts...');
-    const contracts_deployed = file_utils.readData(path);
+    const contracts_deployed = file_utils.readData(file_utils.deployPath);
     
     
     // PERMISSION REGISTRY
