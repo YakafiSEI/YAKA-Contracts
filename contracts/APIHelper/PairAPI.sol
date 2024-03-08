@@ -115,9 +115,6 @@ contract PairAPI is Initializable {
 
         pairFactory = IPairFactory(voter.factory());
         underlyingToken = IVotingEscrow(voter.ve()).token();
-
-        algebraFactory = IAlgebraFactory(address(0x306F06C147f064A010530292A1EB6737c3e378e4));
-        
     }
 
 
@@ -330,6 +327,11 @@ contract PairAPI is Initializable {
         IBribeAPI.Reward memory _reward = bribe.rewardData(_token, _ts);
         _rewPerEpoch = _reward.rewardsPerEpoch;
     
+    }
+
+    function setAlgebraFactory(address _algebraFactory) external {
+        require(msg.sender == owner, 'not owner');
+        algebraFactory = IAlgebraFactory(address(_algebraFactory));
     }
 
 
