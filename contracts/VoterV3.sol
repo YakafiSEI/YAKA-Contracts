@@ -618,6 +618,19 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         return poolVote[tokenId].length;
     }
 
+    // only return the first factory
+    function factory() external view returns (address) {
+        if(_factories.length > 0) {
+            return _factories[0];
+        }else {
+            return address(0);
+        }
+    }
+
+    function ve() external view returns (address) {
+        return _ve;
+    }
+
     function factories() external view returns(address[] memory){
         return _factories;
     }
