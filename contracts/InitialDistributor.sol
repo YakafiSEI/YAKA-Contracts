@@ -53,14 +53,6 @@ contract InitialDistributor is IInitialDistributor {
     IYaka public immutable yaka;
 
 
-
-    uint256 public constant MAX_PRE_SUPPLY_OF_PARTNER = 50_000_000 * 1e18;
-    uint256 public constant MAX_SUPPLY_OF_PARTNER = 30_000_000 * 1e18;
-    uint256 public preSupplyOfPartner;
-    uint256 public supplyOfPartner;
-    mapping(address => ReleaseRuleInfo) whitelistOfPartner1;
-    mapping(address => ReleaseRuleInfo) whitelistOfPartner2;
-
     uint256 public constant MAX_SUPPLY_OF_TEAM = 15_000_000 * 1e18;
     uint256 public constant MAX_VE_SUPPLY_OF_TEAM = 15_000_000 * 1e18;
     ReleaseRuleInfo public releaseRuleInfoOfTeam;
@@ -190,6 +182,13 @@ contract InitialDistributor is IInitialDistributor {
     /*///////////////////////////////////////////////////////////////
                              Partner
     //////////////////////////////////////////////////////////////*/
+    uint256 public constant MAX_PRE_SUPPLY_OF_PARTNER = 40_000_000 * 1e18;
+    uint256 public constant MAX_SUPPLY_OF_PARTNER = 30_000_000 * 1e18;
+    uint256 public preSupplyOfPartner;
+    uint256 public supplyOfPartner;
+    mapping(address => ReleaseRuleInfo) whitelistOfPartner1;
+    mapping(address => ReleaseRuleInfo) whitelistOfPartner2;
+
     function addWhitelistOfPartner(
         bool _isStage1,
         address _to,
