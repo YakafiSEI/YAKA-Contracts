@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import '../interfaces/IBribeAPI.sol';
 import '../interfaces/IGaugeAPI.sol';
 import '../interfaces/IGaugeFactory.sol';
-import '../interfaces/IERC20.sol';
+import '../interfaces/IERC20Full.sol';
 import '../interfaces/IMinter.sol';
 import '../interfaces/IPair.sol';
 import '../interfaces/IPairInfo.sol';
@@ -20,6 +20,7 @@ interface IHypervisor{
     function pool() external view returns(address);
     function getTotalAmounts() external view returns(uint tot0,uint tot1);
 }
+
 
 
 interface IDefiEdgeFactory{
@@ -125,9 +126,9 @@ contract PairAPI is Initializable {
         voter = IVoter(_voter);
 
         pairFactory = IPairFactory(voter.factory());
-        underlyingToken = IVotingEscrow(voter.ve()).token();
+        underlyingToken = IVotingEscrow(voter._ve()).token();
 
-        algebraFactory = IAlgebraFactory(address(0xD637cbc214Bc3dD354aBb309f4fE717ffdD0B28C));
+        algebraFactory = IAlgebraFactory(address(0x306F06C147f064A010530292A1EB6737c3e378e4));
         defiEdgeFactory.push(0xB4B715a85B552381a82570a0bb4392d2c77bA883);
         defiEdgeFactory.push(0x0d190eD9033dFA2d6F3340f77A2068D92443BFfE);
         defiEdgeFactory.push(0x77E8526f3399f8C9e1125CCc893512D7F6b85709);
@@ -378,7 +379,7 @@ contract PairAPI is Initializable {
         
         // update variable depending on voter
         pairFactory = IPairFactory(voter.factory());
-        underlyingToken = IVotingEscrow(voter.ve()).token();
+        underlyingToken = IVotingEscrow(voter._ve()).token();
 
         emit Voter(_oldVoter, _voter);
     }

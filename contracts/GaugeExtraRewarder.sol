@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -182,7 +182,7 @@ contract GaugeExtraRewarder is Ownable {
             uint timeleft = lastDistributedTime - block.timestamp;
             uint notDistributed = rewardPerSecond * timeleft;
             require(amount <= notDistributed, 'too many rewardToken');
-            rewardPerSecond = (notDistributed - amount) / timeleft;
+            rewardPerSecond = (balance - amount) / timeleft;
         }
         IERC20(token).safeTransfer(msg.sender, amount);
 

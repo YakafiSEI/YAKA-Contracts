@@ -2,9 +2,8 @@
 pragma solidity ^0.8.20;
 
 import '../interfaces/IBribeAPI.sol';
-import '../interfaces/IWrappedBribeFactory.sol';
 import '../interfaces/IGaugeFactory.sol';
-import '../interfaces/IERC20.sol';
+import '../interfaces/IERC20Full.sol';
 import '../interfaces/IMinter.sol';
 import '../interfaces/IPair.sol';
 import '../interfaces/IPairFactory.sol';
@@ -30,7 +29,7 @@ contract RewardAPI is Initializable {
         owner = msg.sender;
         voter = IVoter(_voter);
         pairFactory = IPairFactory(voter.factory());
-        underlyingToken = IVotingEscrow(voter.ve()).token();
+        underlyingToken = IVotingEscrow(voter._ve()).token();
     }
 
 
@@ -191,7 +190,7 @@ contract RewardAPI is Initializable {
         voter = IVoter(_voter);
         // update variable depending on voter
         pairFactory = IPairFactory(voter.factory());
-        underlyingToken = IVotingEscrow(voter.ve()).token();
+        underlyingToken = IVotingEscrow(voter._ve()).token();
     }
 
 }

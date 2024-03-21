@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import './libraries/Math.sol';
 import './interfaces/IBribe.sol';
@@ -13,7 +13,7 @@ import './interfaces/IPairFactory.sol';
 import './interfaces/IVotingEscrow.sol';
 import './interfaces/IPermissionsRegistry.sol';
 import './interfaces/IAlgebraFactory.sol';
-import "hardhat/console.sol";
+
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -563,7 +563,7 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
             //isPair = false;
         }
 
-        // gov can create for any pool, even non-YAKA pairs
+        // gov can create for any pool, even non-Thena pairs
         if (!IPermissionsRegistry(permissionRegistry).hasRole("GOVERNANCE",msg.sender)) { 
             require(isPair, "!_pool");
             require(isWhitelisted[tokenA] && isWhitelisted[tokenB], "!whitelisted");
@@ -571,11 +571,11 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
         // create internal and external bribe
-        address _owner = IPermissionsRegistry(permissionRegistry).yakaTeamMultisig();
-        string memory _type =  string.concat("YAKA LP Fees: ", IERC20(_pool).symbol() );
+        address _owner = IPermissionsRegistry(permissionRegistry).thenaTeamMultisig();
+        string memory _type =  string.concat("Thena LP Fees: ", IERC20(_pool).symbol() );
         _internal_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
-        _type = string.concat("YAKA Bribes: ", IERC20(_pool).symbol() );
+        _type = string.concat("Thena Bribes: ", IERC20(_pool).symbol() );
         _external_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
         // create gauge
@@ -616,19 +616,6 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     /// @notice view the total length of the voted pools given a tokenId
     function poolVoteLength(uint256 tokenId) external view returns(uint256) { 
         return poolVote[tokenId].length;
-    }
-
-    // only return the first factory
-    function factory() external view returns (address) {
-        if(_factories.length > 0) {
-            return _factories[0];
-        }else {
-            return address(0);
-        }
-    }
-
-    function ve() external view returns (address) {
-        return _ve;
     }
 
     function factories() external view returns(address[] memory){

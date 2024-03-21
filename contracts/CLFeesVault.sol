@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -209,7 +209,7 @@ contract CLFeesVault {
     /// @notice Recover ERC20 from the contract.
     function emergencyRecoverERC20(address tokenAddress, uint256 tokenAmount) external onlyAdmin {
         require(tokenAmount <= IERC20(tokenAddress).balanceOf(address(this)));
-        IERC20(tokenAddress).safeTransfer(permissionsRegsitry.yakaTeamMultisig(), tokenAmount);
+        IERC20(tokenAddress).safeTransfer(permissionsRegsitry.thenaTeamMultisig(), tokenAmount);
     }
 
 }

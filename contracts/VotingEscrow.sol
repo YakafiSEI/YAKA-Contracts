@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import {IERC721, IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
@@ -88,7 +88,7 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
     uint internal tokenId;
 
     /// @notice Contract constructor
-    /// @param token_addr `YAKA` token address
+    /// @param token_addr `THENA` token address
     constructor(address token_addr, address art_proxy) {
         token = token_addr;
         voter = msg.sender;
@@ -127,8 +127,8 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
                              METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    string constant public name = "veYAKA";
-    string constant public symbol = "veYAKA";
+    string constant public name = "veThena";
+    string constant public symbol = "veTHE";
     string constant public version = "1.0.0";
     uint8 constant public decimals = 18;
 

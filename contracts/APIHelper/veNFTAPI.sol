@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 
 import '../interfaces/IBribeAPI.sol';
-import '../interfaces/IERC20.sol';
+import '../interfaces/IERC20Full.sol';
 import '../interfaces/IPair.sol';
 import '../interfaces/IPairFactory.sol';
 import '../interfaces/IVoter.sol';
@@ -14,7 +14,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
 import "hardhat/console.sol";
-
 interface IPairAPI {
     struct PairInfo {
         // pair info
@@ -115,7 +114,7 @@ contract veNFTAPI is Initializable {
         voter = IVoter(_voter);
         rewardDisitributor = IRewardsDistributor(_rewarddistro);
 
-        require(rewardDisitributor.voting_escrow() == voter.ve(), 've!=ve');
+        require(rewardDisitributor.voting_escrow() == voter._ve(), 've!=ve');
         
         ve = IVotingEscrow( rewardDisitributor.voting_escrow() );
         underlyingToken = IVotingEscrow(ve).token();
@@ -337,7 +336,7 @@ contract veNFTAPI is Initializable {
         require(msg.sender == owner);
         
         rewardDisitributor = IRewardsDistributor(_rewarddistro);
-        require(rewardDisitributor.voting_escrow() == voter.ve(), 've!=ve');
+        require(rewardDisitributor.voting_escrow() == voter._ve(), 've!=ve');
 
         ve = IVotingEscrow( rewardDisitributor.voting_escrow() );
         underlyingToken = IVotingEscrow(ve).token();
