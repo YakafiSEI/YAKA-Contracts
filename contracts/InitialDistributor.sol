@@ -42,6 +42,7 @@ contract InitialDistributor is IInitialDistributor {
         uint256 latestClaimedTime;
     }
 
+    address public treasury;
     address public community;
     address public team;
     address public lp;
@@ -51,9 +52,7 @@ contract InitialDistributor is IInitialDistributor {
     IVotingEscrow public immutable ve;
     IYaka public immutable yaka;
 
-    uint256 public constant MAX_SUPPLY_OF_COMMUNITY = 48_000_000 * 1e18;
-    uint256 public supplyOfCommunity;
-    mapping(address => ReleaseRuleInfo) whitelistOfcommunity;
+
 
     uint256 public constant MAX_PRE_SUPPLY_OF_PARTNER = 50_000_000 * 1e18;
     uint256 public constant MAX_SUPPLY_OF_PARTNER = 30_000_000 * 1e18;
@@ -73,6 +72,7 @@ contract InitialDistributor is IInitialDistributor {
     uint256 public constant DEFAULT_LOCK_DURATION = 104 weeks;
     uint256 public constant CLIFF_DURATION = 26 weeks;
 
+    uint256 public constant ONE_WEEK = 604800;
     uint256 public start_period;
 
     address public minter;
@@ -105,90 +105,83 @@ contract InitialDistributor is IInitialDistributor {
         require(!hasSupplyImmediately, "");
         hasSupplyImmediately = true;
 
+        yaka.transfer(community, 42_000_000 * 1e18);//TGE(30M) + veYAKA(12M)
+
+
         yaka.transfer(lp, 10_000_000 * 1e18);
         yaka.transfer(IDO, 14_000_000 * 1e18); //presale(6M) + public sale(8M)
     }
 
     /*///////////////////////////////////////////////////////////////
-                             COMMUNITY
+                             Presale
     //////////////////////////////////////////////////////////////*/
-    function addWhitelistOfCommunity(
-        address to,
-        uint256 amount
+    uint256 public constant MAX_SUPPLY_OF_PRESALE = 6_000_000 * 1e18;
+    uint256 public supplyOfPresale;
+    mapping(address => uint256) amountOfPresale1;
+    mapping(address => uint256) amountOfPresale2;
+    mapping(address => uint256) claimedTimeOfPresale;
+    mapping(address => uint256) claimedAmountOfPresale;
+
+    function addWhitelistOfPresale(
+        address[] calldata users,
+        uint256[] calldata amounts
     ) external onlyAdmin {
-        require(amount > 0, "Amount must greater than 0");
-        supplyOfCommunity += amount;
-        require(supplyOfCommunity <= MAX_SUPPLY_OF_COMMUNITY, "");
+        uint256 len = users.length;
+        require(len == amounts.length, "Mismatch lenght.");
+        
+        for (uint256 i=0; i<len; ++i) {
+            address user = users[i];
+            uint256 amount = amounts[i];
 
-        uint256 veAmount = amount / 2;
-        uint256 tokenAmount = amount - veAmount;
-        uint256 immediateReleaseAmount = (tokenAmount * 300) / 1000;
-        uint256 linearReleaseAmount = (tokenAmount * 700) / 1000;
+            uint256 amount1 = amount * 30 / 100;
+            uint256 amount2 = amount - amount1;
 
-        whitelistOfcommunity[to] = ReleaseRuleInfo(
-            amount,
-            veAmount,
-            immediateReleaseAmount,
-            linearReleaseAmount,
-            0,
-            4 weeks,
-            0,
-            0
-        );
+            amountOfPresale1[user] = amount1;
+            amountOfPresale2[user] = amount2;
+            
+            supplyOfPresale += amount;
+        }
+        require(supplyOfPresale <= MAX_SUPPLY_OF_PRESALE, "");
     }
 
-    function claimForCommunity(address _to) external nonreentrant {
-        uint256 _start_time = start_period;
-        require(block.timestamp > start_period, "cannot claim yet");
-
-        ReleaseRuleInfo memory ruleInfo = whitelistOfcommunity[msg.sender];
-        require(ruleInfo.totalAmount > 0, "Not in the WL.");
-
-        if (_to == address(0)) {
-            _to = msg.sender;
-        }
-
-        uint256 veAmount = ruleInfo.veAmount;
-        if (veAmount > 0) {
-            whitelistOfcommunity[msg.sender].veAmount = 0;
-            ve.create_lock_for(veAmount, DEFAULT_LOCK_DURATION, _to);
-        }
-
-        uint256 transferAmount;
-
-        uint256 immediateReleaseAmount = ruleInfo.immediateReleaseAmount;
-        if (immediateReleaseAmount > 0) {
-            whitelistOfcommunity[msg.sender].immediateReleaseAmount = 0;
-            transferAmount += immediateReleaseAmount;
-        }
-
-        uint256 releaseAmount = _claimableAmount(ruleInfo, _start_time);
-        if (releaseAmount > 0) {
-            whitelistOfcommunity[msg.sender].claimedAmount += releaseAmount;
-        }
-        transferAmount += releaseAmount;
-
-        IYaka(yaka).transfer(_to, transferAmount);
-        whitelistOfcommunity[msg.sender].latestClaimedTime = block.timestamp;
+    function claimableForPresale(address _to) external view returns (uint256) {
+        (uint256 amount1, uint256 amount2) = _claimableForPresale(_to);
+        return (amount1 + amount2);
     }
 
-    function claimableForCommunity(address _to) external view returns (uint256) {
+    function _claimableForPresale(address _to) internal view returns (uint256, uint256) {
         uint256 _start_time = start_period;
         if (_start_time == 0) {
-            return 0;
+            return (0, 0);
         }
 
-        ReleaseRuleInfo memory ruleInfo = whitelistOfcommunity[_to];
-        if (ruleInfo.totalAmount == 0) {
-            return 0;
+        uint256 amount1 = amountOfPresale1[_to];
+        uint256 amount2 = amountOfPresale2[_to];
+        uint256 claimedTime = claimedTimeOfPresale[_to];
+
+        if (claimedTime == 0) {
+            claimedTime = start_period;
         }
 
-        uint256 immediateReleaseAmount = ruleInfo.immediateReleaseAmount;
-        // console2.log("immediateReleaseAmount ", immediateReleaseAmount);
-        uint256 releaseAmount = _claimableAmount(ruleInfo, _start_time);
-        // console2.log("releaseAmount ", releaseAmount);
+        if (claimedTime > (start_period + 12 * ONE_WEEK)) {
+            return (amount1, amount2 - claimedAmountOfPresale[_to]);
+        }
 
-        return (immediateReleaseAmount + releaseAmount);
+        claimedTime = claimedTime == 0 ? start_period : claimedTime;
+        uint256 releaseAmount = amount2 * (block.timestamp - claimedTime) / (12 * ONE_WEEK);
+        return (amount1, releaseAmount);
+    }
+
+
+    function claimForPresale() external nonreentrant {
+        require(block.timestamp > start_period, "cannot claim yet");
+
+        (uint256 amount1, uint256 amount2) = _claimableForPresale(msg.sender);
+        claimedTimeOfPresale[msg.sender] = block.timestamp;
+        claimedAmountOfPresale[msg.sender] += amount2;
+
+        uint256 transferAmount = amount1 + amount2;
+        IYaka(yaka).transfer(msg.sender, transferAmount);
     }
 
     /*///////////////////////////////////////////////////////////////
