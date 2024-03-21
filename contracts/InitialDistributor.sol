@@ -177,11 +177,14 @@ contract InitialDistributor is IInitialDistributor {
         require(block.timestamp > start_period, "cannot claim yet");
 
         (uint256 amount1, uint256 amount2) = _claimableForPresale(msg.sender);
-        claimedTimeOfPresale[msg.sender] = block.timestamp;
+        if (amount1 > 0) {
+            amountOfPresale1[msg.sender] = 0;
+        }
         claimedAmountOfPresale[msg.sender] += amount2;
 
-        uint256 transferAmount = amount1 + amount2;
-        IYaka(yaka).transfer(msg.sender, transferAmount);
+        amount1 += amount2;
+        IYaka(yaka).transfer(msg.sender, amount1);
+        claimedTimeOfPresale[msg.sender] = block.timestamp;
     }
 
     /*///////////////////////////////////////////////////////////////
