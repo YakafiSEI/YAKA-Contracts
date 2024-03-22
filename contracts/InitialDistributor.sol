@@ -108,11 +108,8 @@ contract InitialDistributor is IInitialDistributor {
         require(!hasSupplyImmediately, "");
         hasSupplyImmediately = true;
 
-        yaka.transfer(community, 42_000_000 * 1e18);//TGE(30M) + veYAKA(12M)
-
-
-        yaka.transfer(lp, 10_000_000 * 1e18);
-        yaka.transfer(IDO, 14_000_000 * 1e18); //presale(6M) + public sale(8M)
+        yaka.transfer(community, 50_000_000 * 1e18);//TGE(30M) + veYAKA(12M) + IDO（8M）
+        yaka.transfer(lp, 10_000_000 * 1e18);//LP（10M）
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -343,62 +340,82 @@ contract InitialDistributor is IInitialDistributor {
         releaseRuleInfoOfTeam.latestClaimedTime = block.timestamp;
     }
 
+
     /*///////////////////////////////////////////////////////////////
-                             Vestor
+                            Token Sale
     //////////////////////////////////////////////////////////////*/
-    function addWhitelistOfVestor(
-        address _to,
-        uint256 _amount
+    uint256 public constant MAX_SUPPLY_OF_TOKEN_SALE = 12_000_000 * 1e18;
+    uint256 public supplyOfTokenSale;
+    mapping(address => uint256) amountOfTokenSale1;
+    mapping(address => uint256) amountOfTokenSale2;
+    mapping(address => uint256) claimedTimeOfTokenSale;
+    mapping(address => uint256) claimedAmountOfTokenSale;
+
+    function addWhitelistOfTokenSale(
+        address[] calldata users,
+        uint256[] calldata amounts
     ) external onlyAdmin {
-        require(_amount > 0, "Amount must greater than 0");
-        supplyOfVestor += _amount;
-        require(supplyOfVestor <= MAX_SUPPLY_OF_VESTOR, "");
+        uint256 len = users.length;
+        require(len == amounts.length, "Mismatch lenght.");
+        
+        for (uint256 i=0; i<len; ++i) {
+            address user = users[i];
+            uint256 amount = amounts[i];
 
-        whitelistOfVestor[_to] = ReleaseRuleInfo(
-            _amount,
-            0,
-            0,
-            _amount,
-            CLIFF_DURATION,
-            DEFAULT_LOCK_DURATION,
-            0,
-            0
-        );
+            uint256 amount1 = amount * 40 / 100;
+            uint256 amount2 = amount - amount1;
+
+            amountOfTokenSale1[user] = amount1;
+            amountOfTokenSale2[user] = amount2;
+            
+            supplyOfTokenSale += amount;
+        }
+        require(supplyOfTokenSale <= MAX_SUPPLY_OF_TOKEN_SALE, "");
     }
 
-    function claimForVestor(address _to) external nonreentrant {
-        uint256 _start_time = start_period;
-        require(block.timestamp > start_period, "cannot claim yet");
-        ReleaseRuleInfo memory ruleInfo = whitelistOfVestor[msg.sender];
-        require(ruleInfo.totalAmount > 0, "Not in the WL.");
-
-        if (_to == address(0)) {
-            _to = msg.sender;
-        }
-
-        uint256 transferAmount = _claimableAmount(ruleInfo, _start_time);
-        if (transferAmount > 0) {
-            whitelistOfVestor[msg.sender].claimedAmount += transferAmount;
-        }
-
-        IYaka(yaka).transfer(_to, transferAmount);
-        whitelistOfVestor[msg.sender].latestClaimedTime = block.timestamp;
+    function claimableForTokenSale(address _to) external view returns (uint256) {
+        (uint256 amount1, uint256 amount2) = _claimableForTokenSale(_to);
+        return (amount1 + amount2);
     }
 
-    function claimableForVestor(address _to) external view returns (uint256) {
+    function _claimableForTokenSale(address _to) internal view returns (uint256, uint256) {
         uint256 _start_time = start_period;
         if (_start_time == 0) {
-            return 0;
+            return (0, 0);
         }
 
-        ReleaseRuleInfo memory ruleInfo = whitelistOfVestor[_to];
-        if (ruleInfo.totalAmount == 0) {
-            return 0;
+        uint256 amount1 = amountOfTokenSale1[_to];
+        uint256 amount2 = amountOfTokenSale2[_to];
+        uint256 claimedTime = claimedTimeOfTokenSale[_to];
+
+        if (claimedTime == 0) {
+            claimedTime = start_period;
         }
 
-        uint256 releaseAmount = _claimableAmount(ruleInfo, _start_time);
-        return releaseAmount;
+        if (claimedTime > (start_period + 12 * ONE_WEEK)) {
+            return (amount1, amount2 - claimedAmountOfTokenSale[_to]);
+        }
+
+        claimedTime = claimedTime == 0 ? start_period : claimedTime;
+        uint256 releaseAmount = amount2 * (block.timestamp - claimedTime) / 12 weeks;
+        return (amount1, releaseAmount);
     }
+
+
+    function claimForTokenSale() external nonreentrant {
+        require(block.timestamp > start_period, "cannot claim yet");
+
+        (uint256 amount1, uint256 amount2) = _claimableForTokenSale(msg.sender);
+        if (amount1 > 0) {
+            amountOfTokenSale1[msg.sender] = 0;
+        }
+        claimedAmountOfTokenSale[msg.sender] += amount2;
+
+        amount1 += amount2;
+        IYaka(yaka).transfer(msg.sender, amount1);
+        claimedTimeOfTokenSale[msg.sender] = block.timestamp;
+    }
+
 
     function _claimableAmount(
         ReleaseRuleInfo memory info,

@@ -25,7 +25,7 @@ contract Minter is IMinter {
     uint public constant MAX_TEAM_RATE = 50; // 5%
 
     uint public constant WEEK = 86400 * 7; // allows minting once per week (reset every Thursday 00:00 UTC)
-    uint public weekly = 2_000_000 * 1e18; // represents a starting weekly emission of 2.6M yaka (yaka has 18 decimals)
+    uint public weekly = 10_000_000 * 1e18; // represents a starting weekly emission of 2.6M yaka (yaka has 18 decimals)
     uint public active_period;
     uint public genesis_time;
     uint public constant LOCK = 86400 * 7 * 52 * 2;
@@ -49,7 +49,7 @@ contract Minter is IMinter {
         address __team
     ) {
         owner = msg.sender;
-        teamRate = 30; // 30 bps = 3%
+        teamRate = 35;
         _yaka = IYaka(IVotingEscrow(__ve).token());
         _voter = IVoter(__voter);
         _ve = IVotingEscrow(__ve);
