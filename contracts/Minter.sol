@@ -14,6 +14,7 @@ import "./interfaces/IInitialDistributor.sol";
 contract Minter is IMinter {
 
     bool public isFirstMint = true;
+    bool public initialized;
 
     uint public EMISSION = 990;
     uint public TAIL_EMISSION = 2;
@@ -25,7 +26,7 @@ contract Minter is IMinter {
     uint public constant MAX_TEAM_RATE = 50; // 5%
 
     uint public constant WEEK = 86400 * 7; // allows minting once per week (reset every Thursday 00:00 UTC)
-    uint public weekly = 10_000_000 * 1e18; // represents a starting weekly emission of 2.6M yaka (yaka has 18 decimals)
+    uint public weekly = 10_000_000 * 1e18; // represents a starting weekly emission of 10M yaka (yaka has 18 decimals)
     uint public active_period;
     uint public genesis_time;
     uint public constant LOCK = 86400 * 7 * 52 * 2;
@@ -60,7 +61,11 @@ contract Minter is IMinter {
 
     function initialize() external {
         require(owner == msg.sender);
+        if (initialized) {
+            return;
+        }
         initialSupply();
+        initialized = true;
     }
 
     function initialSupply() internal {
