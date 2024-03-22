@@ -53,8 +53,8 @@ contract InitialDistributor is IInitialDistributor {
     IYaka public immutable yaka;
 
 
-    uint256 public constant MAX_SUPPLY_OF_TEAM = 15_000_000 * 1e18;
-    uint256 public constant MAX_VE_SUPPLY_OF_TEAM = 15_000_000 * 1e18;
+    uint256 public constant MAX_SUPPLY_OF_TEAM = 16_000_000 * 1e18;
+    uint256 public constant MAX_VE_SUPPLY_OF_TEAM = 16_000_000 * 1e18;
     ReleaseRuleInfo public releaseRuleInfoOfTeam;
 
     uint256 public constant MAX_SUPPLY_OF_VESTOR = 6_000_000 * 1e18;
@@ -88,6 +88,17 @@ contract InitialDistributor is IInitialDistributor {
             MAX_SUPPLY_OF_TEAM,
             CLIFF_DURATION,
             DEFAULT_LOCK_DURATION,
+            0,
+            0
+        );
+
+        releaseRuleInfoOfTreasury = ReleaseRuleInfo(
+            20_000_000 * 1e18,
+            0,
+            12_000_000 * 1e18,
+            8_000_000 * 1e18,
+            1 weeks,
+            8 weeks,
             0,
             0
         );
@@ -286,6 +297,25 @@ contract InitialDistributor is IInitialDistributor {
             return 0;
         }
         return info.veAmount;
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                             Ecosystem
+    //////////////////////////////////////////////////////////////*/
+    ReleaseRuleInfo public releaseRuleInfoOfTreasury;
+
+    function claimForTreasury() external nonreentrant {
+        uint256 _start_time = start_period;
+        require(block.timestamp > (_start_time + ONE_WEEK), "cannot claim yet");
+
+        ReleaseRuleInfo memory ruleInfo = releaseRuleInfoOfTreasury;
+        uint256 transferAmount = _claimableAmount(ruleInfo, _start_time);
+        if (transferAmount > 0) {
+            releaseRuleInfoOfTreasury.claimedAmount += transferAmount;
+        }
+
+        IYaka(yaka).transfer(treasury, transferAmount);
+        releaseRuleInfoOfTreasury.latestClaimedTime = block.timestamp;
     }
 
     /*///////////////////////////////////////////////////////////////
