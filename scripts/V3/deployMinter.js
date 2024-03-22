@@ -15,8 +15,8 @@ async function main () {
     const ve = contracts_deployed['VotingEscrow'];
     const voter =	contracts_deployed['VoterV3'];
     const rewDistro = contracts_deployed['RewardsDistributor'];
-    const initDistro = initConfig['TEAM'];
-    const team = contracts_deployed['RewardsDistributor'];
+    const initDistro = contracts_deployed['InitialDistributor'];
+    const team = initConfig['TEAM'];
 
     console.log(" ve:%s\n voter:%s\n rewDistro:%s\n initDistro:%s\n team:%s\n", ve, voter, rewDistro, initDistro, team);
 
