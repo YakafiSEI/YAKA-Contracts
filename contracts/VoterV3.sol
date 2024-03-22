@@ -621,6 +621,13 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     function factories() external view returns(address[] memory){
         return _factories;
     }
+
+    function factory() external view returns (address) {
+        if (_factories.length == 0) {
+            return address(0);
+        }
+        return _factories[0];
+    }
     
     function factoryLength() external view returns(uint256){
         return _factories.length;
