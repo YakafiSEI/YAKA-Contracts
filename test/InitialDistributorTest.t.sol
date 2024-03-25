@@ -193,7 +193,7 @@ contract InitialDistributorTest is BaseTest {
         uint256 veLength = ve.balanceOf(TEAM);
         uint256 veYakaId = ve.tokenOfOwnerByIndex(TEAM, 0);
         (int128 lockedBalance, uint256 end) = ve.locked(veYakaId);
-        assertEq(15_000_000 * 1e18, lockedBalance);
+        assertEq(16_000_000 * 1e18, lockedBalance);
         assertEq(genesisEpoch + 1 weeks + 104 weeks, end);//lock 104 weeks
         assertEq(1, veLength);
         assertEq(1, veYakaId);
@@ -206,7 +206,7 @@ contract InitialDistributorTest is BaseTest {
         vm.stopPrank();
         amount = IERC20(address(YAKA)).balanceOf(TEAM);
         uint256 week = 104;
-        uint256 expect = 15000000 * 1e18 / week;
+        uint256 expect = 16000000 * 1e18 / week;
         assertEq(amount, expect);
 
         uint256 veLength2 = ve.balanceOf(TEAM);

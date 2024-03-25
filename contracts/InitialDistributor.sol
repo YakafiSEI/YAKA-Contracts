@@ -336,7 +336,7 @@ contract InitialDistributor is IInitialDistributor {
         }
 
         IYaka(yaka).transfer(_team, transferAmount);
-        releaseRuleInfoOfTeam.latestClaimedTime = block.timestamp;
+        releaseRuleInfoOfTeam.latestClaimedTime = block.timestamp / 1 weeks * 1 weeks;
     }
 
 
