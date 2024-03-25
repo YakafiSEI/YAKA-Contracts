@@ -5,6 +5,7 @@ import "./interfaces/IYaka.sol";
 import "./interfaces/IVotingEscrow.sol";
 import "./interfaces/IInitialDistributor.sol";
 import "./Minter.sol";
+import "forge-std/console2.sol";
 
 contract InitialDistributor is IInitialDistributor {
     /*//////////////////////////////////////////////////////////////
@@ -72,10 +73,10 @@ contract InitialDistributor is IInitialDistributor {
 
     mapping(address => bool) internal adminRoles;
 
-    constructor(address _ve, address _lp, address _IDO, address _team) {
+    constructor(address _ve, address _lp, address _community, address _team) {
         ve = IVotingEscrow(_ve);
         lp = _lp;
-        IDO = _IDO;
+        community = _community;
         yaka = IYaka(IVotingEscrow(_ve).token());
         team = _team;
         adminRoles[msg.sender] = true;
@@ -163,12 +164,13 @@ contract InitialDistributor is IInitialDistributor {
             claimedTime = start_period;
         }
 
-        if (claimedTime > (start_period + 12 * ONE_WEEK)) {
+        if (block.timestamp > (start_period + 12 weeks)) {
             return (amount1, amount2 - claimedAmountOfPresale[_to]);
         }
 
         claimedTime = claimedTime == 0 ? start_period : claimedTime;
-        uint256 releaseAmount = amount2 * (block.timestamp - claimedTime) / (12 * ONE_WEEK);
+        uint256 duration = (block.timestamp - claimedTime) / 1 weeks;
+        uint256 releaseAmount = amount2 * duration / 12;
         return (amount1, releaseAmount);
     }
 
@@ -184,7 +186,7 @@ contract InitialDistributor is IInitialDistributor {
 
         amount1 += amount2;
         IYaka(yaka).transfer(msg.sender, amount1);
-        claimedTimeOfPresale[msg.sender] = block.timestamp;
+        claimedTimeOfPresale[msg.sender] = block.timestamp / 1 weeks * 1 weeks;
     }
 
     /*///////////////////////////////////////////////////////////////
