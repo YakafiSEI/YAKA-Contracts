@@ -107,7 +107,7 @@ contract InitialDistributorTest is BaseTest {
 
         vm.roll(2);
         vm.startPrank(Alice);
-        initialDistributor.claimForPartner(true, Alice);
+        initialDistributor.claimForPartner(true);
         vm.stopPrank();
 
         uint256 veLength = ve.balanceOf(Alice);
@@ -122,6 +122,21 @@ contract InitialDistributorTest is BaseTest {
         vm.roll(3);
         amount = initialDistributor.claimableForPartner(true, Alice);
         assertEq(0, amount);
+
+        initialDistributor.addWhitelistOfPartner(false, Bob, 10000);
+        amount = initialDistributor.claimableForPartner(false, Bob);
+        assertEq(10000, amount);
+
+        vm.warp(genesisEpoch + 3 weeks);
+        vm.roll(4);
+        vm.startPrank(Bob);
+        initialDistributor.claimForPartner(false);
+        vm.stopPrank();
+        veLength = ve.balanceOf(Bob);
+        veYakaId = ve.tokenOfOwnerByIndex(Bob, 0);
+        assertEq(1, veLength);
+        assertEq(2, veYakaId);
+
     }
 
     //forge test --match-test test_addForPartner -vvv

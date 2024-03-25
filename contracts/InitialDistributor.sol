@@ -206,6 +206,7 @@ contract InitialDistributor is IInitialDistributor {
     ) external onlyAdmin {
         require(_amount > 0, "Amount must greater than 0");
         if (_isStage1) {
+            require(start_period == 0, "start_period > 0");
             preSupplyOfPartner += _amount;
             require(preSupplyOfPartner <= MAX_PRE_SUPPLY_OF_PARTNER, "");
         } else {
@@ -232,8 +233,7 @@ contract InitialDistributor is IInitialDistributor {
     }
 
     function claimForPartner(
-        bool _isStage1,
-        address _to
+        bool _isStage1
     ) external nonreentrant {
         uint256 _start_time = start_period;
         require(block.timestamp > _start_time, "cannot claim yet");
@@ -248,13 +248,9 @@ contract InitialDistributor is IInitialDistributor {
         }
         require(info.totalAmount > 0, "Not in the WL.");
 
-        if (_to == address(0)) {
-            _to = msg.sender;
-        }
-
         uint256 releaseAmount = _claimableForPartner(info, _start_time);
         require(releaseAmount > 0, "Has beem claimed.");
-        ve.create_lock_for(releaseAmount, DEFAULT_LOCK_DURATION, _to);
+        ve.create_lock_for(releaseAmount, DEFAULT_LOCK_DURATION, msg.sender);
 
         if (_isStage1) {
             whitelistOfPartner1[msg.sender].veAmount = 0;
