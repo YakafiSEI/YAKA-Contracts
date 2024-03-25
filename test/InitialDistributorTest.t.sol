@@ -214,45 +214,70 @@ contract InitialDistributorTest is BaseTest {
 
     }
 
-    //forge test --match-test test_claimForVestor -vvv
-    // function test_claimForVestor() public {
-    //     initialDistributor.addWhitelistOfVestor(Alice, 1000);
+    //forge test --match-test test_claimableForTokenSale -vvv
+    function test_claimableForTokenSale() public {
+        address[] memory users = new address[](2);
+        users[0] = Alice;
+        users[1] = Bob;
 
-    //     uint256 amount = initialDistributor.claimableForVestor(Alice);
-    //     assertEq(amount, 0);
-    //     launchDex();
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 1000;
+        amounts[1] = 2000;
 
-    //     vm.warp(genesisEpoch + 1 weeks);
-    //     vm.roll(1);
-    //     amount = initialDistributor.claimableForVestor(Alice);
-    //     assertEq(0, amount);
+        initialDistributor.addWhitelistOfTokenSale(users, amounts);
 
-    //     vm.warp(genesisEpoch + 27 weeks);
-    //     vm.roll(2);
+        uint256 amount = initialDistributor.claimableForTokenSale(Alice);
+        assertEq(amount, 0);
+        launchDex();
 
-    //     vm.startPrank(Alice);
-    //     initialDistributor.claimForVestor(Alice);
-    //     vm.stopPrank();
+        vm.warp(genesisEpoch + 3 days);
+        vm.roll(1);
+        vm.startPrank(Alice);
+        initialDistributor.claimForTokenSale();
+        vm.stopPrank();
+        amount = IERC20(address(YAKA)).balanceOf(Alice);
+        assertEq(400, amount);
 
-    //     amount = IERC20(address(YAKA)).balanceOf(Alice);
-    //     assertEq(amount, 9);
+        //=========== week 1 =============
+        vm.warp(genesisEpoch + 1 weeks + 1 days);
+        vm.roll(2);
+        vm.startPrank(Alice);
+        initialDistributor.claimForTokenSale();
+        vm.stopPrank();
 
-    //     vm.warp(genesisEpoch + 129 weeks);
-    //     vm.roll(3);
+        amount = IERC20(address(YAKA)).balanceOf(Alice);
+        assertEq(400 + 1*50, amount);
 
-    //     vm.startPrank(Alice);
-    //     initialDistributor.claimForVestor(Alice);
-    //     vm.stopPrank();
-    //     amount = IERC20(address(YAKA)).balanceOf(Alice);
-    //     assertEq(amount, 989);
-    // }
+        //=========== week 2 =============
+        vm.warp(genesisEpoch + 2 weeks + 1 days);
+        vm.roll(3);
+        vm.startPrank(Alice);
+        initialDistributor.claimForTokenSale();
+        vm.stopPrank();
 
-    //forge test --match-test test_addForVestor -vvv
-    // function test_addForVestor() public {
-    //     uint256 MAX = 6_000_000 * 1e18;
-    //     initialDistributor.addWhitelistOfVestor(Alice, MAX/2);
-    //     initialDistributor.addWhitelistOfVestor(Bob, MAX/2);
-    // }
+        amount = IERC20(address(YAKA)).balanceOf(Alice);
+        assertEq(400 + 2*50, amount);
+
+        //=========== week 12 =============
+        vm.warp(genesisEpoch + 12 weeks + 1 days);
+        vm.roll(5);
+        vm.startPrank(Alice);
+        initialDistributor.claimForTokenSale();
+        vm.stopPrank();
+
+        amount = IERC20(address(YAKA)).balanceOf(Alice);
+        assertEq(400 + 600, amount);
+
+        //=========== week 13 =============
+        vm.warp(genesisEpoch + 13 weeks + 1 days);
+        vm.roll(6);
+        vm.startPrank(Alice);
+        initialDistributor.claimForTokenSale();
+        vm.stopPrank();
+
+        amount = IERC20(address(YAKA)).balanceOf(Alice);
+        assertEq(400 + 600, amount);
+    }
 
 
     function launchDex() internal {

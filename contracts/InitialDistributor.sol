@@ -48,7 +48,6 @@ contract InitialDistributor is IInitialDistributor {
     address public team;
     address public lp;
     address public tokenSale;
-    address public IDO;
 
     IVotingEscrow public immutable ve;
     IYaka public immutable yaka;
@@ -65,7 +64,6 @@ contract InitialDistributor is IInitialDistributor {
     uint256 public constant DEFAULT_LOCK_DURATION = 104 weeks;
     uint256 public constant CLIFF_DURATION = 26 weeks;
 
-    uint256 public constant ONE_WEEK = 604800;
     uint256 public start_period;
 
     address public minter;
@@ -391,12 +389,13 @@ contract InitialDistributor is IInitialDistributor {
             claimedTime = start_period;
         }
 
-        if (claimedTime > (start_period + 12 * ONE_WEEK)) {
+        if (block.timestamp > (start_period + 12 weeks)) {
             return (amount1, amount2 - claimedAmountOfTokenSale[_to]);
         }
 
         claimedTime = claimedTime == 0 ? start_period : claimedTime;
-        uint256 releaseAmount = amount2 * (block.timestamp - claimedTime) / 12 weeks;
+        uint256 duration = (block.timestamp - claimedTime) / 1 weeks; 
+        uint256 releaseAmount = amount2 * duration / 12;
         return (amount1, releaseAmount);
     }
 
@@ -412,7 +411,7 @@ contract InitialDistributor is IInitialDistributor {
 
         amount1 += amount2;
         IYaka(yaka).transfer(msg.sender, amount1);
-        claimedTimeOfTokenSale[msg.sender] = block.timestamp;
+        claimedTimeOfTokenSale[msg.sender] = block.timestamp / 1 weeks * 1 weeks;
     }
 
 
