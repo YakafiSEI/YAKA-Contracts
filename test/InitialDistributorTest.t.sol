@@ -148,6 +148,36 @@ contract InitialDistributorTest is BaseTest {
         initialDistributor.addWhitelistOfPartner(false, Alice, MAX_2);
     }
 
+    //forge test --match-test test_claimForTreasury -vvv
+    function test_claimForTreasury() public {
+
+        launchDex();
+        vm.warp(genesisEpoch + 1 weeks + 1 days);
+        initialDistributor.claimForTreasury();
+
+        uint256 amount = IERC20(address(YAKA)).balanceOf(TREASURY);
+        assertEq(12_000_000 * 1e18, amount);
+
+        vm.roll(2);
+        vm.warp(genesisEpoch + 2 weeks + 1 days);
+        initialDistributor.claimForTreasury();
+        amount = IERC20(address(YAKA)).balanceOf(TREASURY);
+        assertEq((12_000_000 + 500_000 * 1) * 1e18, amount);
+
+        vm.roll(3);
+        vm.warp(genesisEpoch + 16 weeks + 1 days);
+        initialDistributor.claimForTreasury();
+        amount = IERC20(address(YAKA)).balanceOf(TREASURY);
+        assertEq((12_000_000 + 500_000 * 15) * 1e18, amount);
+
+        vm.roll(4);
+        vm.warp(genesisEpoch + 17 weeks + 1 days);
+        initialDistributor.claimForTreasury();
+        amount = IERC20(address(YAKA)).balanceOf(TREASURY);
+        assertEq(20_000_000 * 1e18, amount);
+
+    }
+
     //forge test --match-test test_claimForTeam -vvv
     function test_claimForTeam() public {
         launchDex();

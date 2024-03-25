@@ -21,6 +21,7 @@ abstract contract BaseTest is Test {
     address public TEAM = address(9998);
     address public COMMUNITY = address(9997);
     address public LP = address(9996);
+    address public TREASURY = address(9995);
 
     TestOwner owner;
 
@@ -49,7 +50,7 @@ abstract contract BaseTest is Test {
         VeArtProxyUpgradeable artProxy = new VeArtProxyUpgradeable();
         ve = new VotingEscrow(address(YAKA), address(artProxy));
 
-        initialDistributor = new InitialDistributor(address(ve), LP, COMMUNITY, TEAM);
+        initialDistributor = new InitialDistributor(address(ve), LP, COMMUNITY, TEAM, TREASURY);
         minter = new Minter(address(voter), address(ve), address(0), address(initialDistributor), TEAM);
 
         YAKA.setMinter(address(minter));

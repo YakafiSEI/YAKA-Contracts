@@ -73,12 +73,13 @@ contract InitialDistributor is IInitialDistributor {
 
     mapping(address => bool) internal adminRoles;
 
-    constructor(address _ve, address _lp, address _community, address _team) {
+    constructor(address _ve, address _lp, address _community, address _team, address _treasury) {
         ve = IVotingEscrow(_ve);
         lp = _lp;
         community = _community;
         yaka = IYaka(IVotingEscrow(_ve).token());
         team = _team;
+        treasury = _treasury;
         adminRoles[msg.sender] = true;
         yaka.approve(address(_ve), type(uint256).max);
 
@@ -99,7 +100,7 @@ contract InitialDistributor is IInitialDistributor {
             12_000_000 * 1e18,
             8_000_000 * 1e18,
             1 weeks,
-            8 weeks,
+            16 weeks,
             0,
             0
         );
@@ -301,7 +302,7 @@ contract InitialDistributor is IInitialDistributor {
 
     function claimForTreasury() external nonreentrant {
         uint256 _start_time = start_period;
-        require(block.timestamp > (_start_time + ONE_WEEK), "cannot claim yet");
+        require(block.timestamp > (_start_time + 1 weeks), "cannot claim yet");
 
         ReleaseRuleInfo memory ruleInfo = releaseRuleInfoOfTreasury;
         uint256 transferAmount = _claimableAmount(ruleInfo, _start_time);
@@ -310,7 +311,7 @@ contract InitialDistributor is IInitialDistributor {
         }
 
         IYaka(yaka).transfer(treasury, transferAmount);
-        releaseRuleInfoOfTreasury.latestClaimedTime = block.timestamp;
+        releaseRuleInfoOfTreasury.latestClaimedTime = block.timestamp / 1 weeks * 1 weeks;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -427,16 +428,18 @@ contract InitialDistributor is IInitialDistributor {
         }
 
         if (block.timestamp >= endTime) {
-            return info.linearReleaseAmount - info.claimedAmount;
+            return info.totalAmount - info.claimedAmount;
         }
 
-        uint256 _latestClaimTime = info.latestClaimedTime == 0
-            ? cliffTime
-            : info.latestClaimedTime;
+        uint256 releaseAmount;
+        uint256 _latestClaimTime = info.latestClaimedTime;
+        if (_latestClaimTime == 0) {
+            releaseAmount = info.immediateReleaseAmount;
+            _latestClaimTime = cliffTime;
+        }
 
-        uint256 diffTime = block.timestamp - _latestClaimTime;
-        uint256 releaseAmount = (info.linearReleaseAmount * diffTime) /
-            info.releaseDuration;
+        uint256 duration = (block.timestamp - _latestClaimTime) / 1 weeks * 1 weeks;
+        releaseAmount += (info.linearReleaseAmount * duration) / info.releaseDuration;
         return releaseAmount;
     }
 
