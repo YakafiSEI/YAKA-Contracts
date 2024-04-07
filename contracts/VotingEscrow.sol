@@ -127,10 +127,11 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
                              METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    string constant public name = "veThena";
-    string constant public symbol = "veTHE";
+    string constant public name = "veYaka";
+    string constant public symbol = "veYAKA";
     string constant public version = "1.0.0";
     uint8 constant public decimals = 18;
+    bool public canSplit;
 
     function setTeam(address _team) external {
         require(msg.sender == team);
@@ -1087,6 +1088,7 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
      * @param _tokenId  NFTs ID
      */
     function split(uint[] memory amounts, uint _tokenId) external {
+        require(canSplit, "Can not split.");
         
         // check permission and vote
         require(attachments[_tokenId] == 0 && !voted[_tokenId], "attached");
@@ -1128,6 +1130,11 @@ contract VotingEscrow is IERC721, IERC721Metadata, IVotes {
             _deposit_for(_tokenId, _value, unlock_time, locked[_tokenId], DepositType.SPLIT_TYPE);
         }     
 
+    }
+
+    function setSplit(bool _canSplit) external {
+        require(msg.sender == team);
+        canSplit = _canSplit;
     }
 
     /*///////////////////////////////////////////////////////////////
