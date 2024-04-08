@@ -5,7 +5,6 @@ import "./interfaces/IYaka.sol";
 import "./interfaces/IVotingEscrow.sol";
 import "./interfaces/IInitialDistributor.sol";
 import "./Minter.sol";
-import "forge-std/console2.sol";
 
 contract InitialDistributor is IInitialDistributor {
     /*//////////////////////////////////////////////////////////////

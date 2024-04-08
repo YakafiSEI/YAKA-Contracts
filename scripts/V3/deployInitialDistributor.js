@@ -17,12 +17,13 @@ async function main () {
     lpAddress = initConfig['LP']
     idoAddress = initConfig['IDO']
     teamAddress = initConfig['TEAM']
+    treasuryAddress = initConfig['TREASURY']
 
-    console.log(" ve:%s \n lp:%s \n ido:%s \n team:%s", veAddress, lpAddress, idoAddress, teamAddress);
+    console.log(" ve:%s \n lp:%s \n ido:%s \n team:%s, \ntreasury:%s", veAddress, lpAddress, idoAddress, teamAddress, treasuryAddress);
 
 
     data = await ethers.getContractFactory("InitialDistributor");
-    initDistro = await data.deploy(veAddress, lpAddress, idoAddress, teamAddress);
+    initDistro = await data.deploy(veAddress, lpAddress, idoAddress, teamAddress, treasuryAddress);
     txDeployed = await initDistro.deployed();
     console.log("InitialDistributor:", initDistro.address);
 

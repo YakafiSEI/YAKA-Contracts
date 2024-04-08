@@ -127,12 +127,6 @@ contract PairAPI is Initializable {
 
         pairFactory = IPairFactory(voter.factory());
         underlyingToken = IVotingEscrow(voter._ve()).token();
-
-        algebraFactory = IAlgebraFactory(address(0x306F06C147f064A010530292A1EB6737c3e378e4));
-        defiEdgeFactory.push(0xB4B715a85B552381a82570a0bb4392d2c77bA883);
-        defiEdgeFactory.push(0x0d190eD9033dFA2d6F3340f77A2068D92443BFfE);
-        defiEdgeFactory.push(0x77E8526f3399f8C9e1125CCc893512D7F6b85709);
-        defiEdgeFactory.push(0x3D823753B00DaEC603Ea7c1358F91641DC8E14B2);
         
     }
 
@@ -387,6 +381,11 @@ contract PairAPI is Initializable {
     function pushdefiedgefactory(address factory) external {
         require(msg.sender == owner, 'not owner');
         defiEdgeFactory.push(factory);
+    }
+
+    function setAlgebraFactory(address _factory) external {
+        require(msg.sender == owner, 'not owner');
+        algebraFactory = IAlgebraFactory(_factory);
     }
 
 
