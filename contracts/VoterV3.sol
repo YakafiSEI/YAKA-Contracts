@@ -662,6 +662,10 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     function _epochTimestamp() public view returns(uint256) {
         return IMinter(minter).active_period();
     }
+
+    function ve() external view returns (address) {
+        return _ve;
+    }
     /* -----------------------------------------------------------------------------
     --------------------------------------------------------------------------------
     --------------------------------------------------------------------------------
