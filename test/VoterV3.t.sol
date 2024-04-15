@@ -36,17 +36,21 @@ contract VoterV3Test is BaseTest {
 
         vm.warp(genesisEpoch);
 
-        deployCoins();   
+        vm.startPrank(musk);
+        deployCoins();
         deployBase1();
 
         minter.initialize();
+
+        vm.stopPrank();
+
         assertEq(IERC20(address(YAKA)).balanceOf(address(initialDistributor)), 200_000_000 * 1e18);
 
         initContract();
     }
 
     // forge test --match-path test/VoterV3.t.sol --match-contract VoterV3Test --match-test test_vote -vvvv
-    function test_vote() public {
+    function test_vote() public returns(address) {
         
         uint256 tokenId = _lock();
         // vote: vote(uint256 _tokenId, address[] calldata _poolVote, uint256[] calldata _weights) 
@@ -61,9 +65,28 @@ contract VoterV3Test is BaseTest {
 
         vm.startPrank(musk);
          voter.vote(tokenId, _poolVote, _weights);
+         // print 
+         uint256 voted = voter.votes(tokenId, pair);
+         console2.log("tokenId:%d,voted:%d", tokenId, voted);
 
          vm.stopPrank();
+
+         return pair;
         
+    }
+
+    // forge test --match-path test/VoterV3.t.sol --match-contract VoterV3Test --match-test test_rewards -vvvv
+    function test_rewards() public {
+        address pool = test_vote();
+        vm.warp(block.timestamp + 1 weeks);
+
+        // get guage bribes
+        address guageAddress = voter.gauges(pool);
+        address internalBribe = voter.internal_bribes(guageAddress);
+        address externalBribe = voter.external_bribes(guageAddress);
+
+        console2.log("internalBribe:%s,externalBribe:%s", internalBribe, externalBribe);
+
     }
 
     function _lock() public returns(uint256) {
@@ -109,6 +132,9 @@ contract VoterV3Test is BaseTest {
         tokens[0] = address(YAKA);
         tokens[1] = address(SKY);
         voter._init(tokens, address(permissionsRegistry), address(minter));
+
+        // ve 上设置voter
+        ve.setVoter(address(voter));
 
         // 在bribeFactory setVoter
         bribeFactory.setVoter(address(voter));
