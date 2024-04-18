@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
 import "../contracts/APIHelper/PairAPI.sol";
-
+    
 interface IPairAPI {
     struct PairInfo {
         // pair info
@@ -70,16 +70,23 @@ interface IPairAPI {
     function getAllPair(uint _amounts, uint _offset) external view returns(PairInfo[] memory Pairs);
 }
 
+interface IVoterV3 {
+    function createGauge(address _pool, uint256 _gaugeType) external returns (address _gauge, address _internal_bribe, address _external_bribe);
+}
+
 contract PairAPITest is Test {
    
     uint256 seiDevFork;
     address public pairAPIAddress = 0x4C770F6E1eE2E44Ec0BB93836eDA4EAc0b74A7ac;
+    address public voterAddress = 0xaC1Ade0E515bE9F798B1f972cF59848bFe98b8F3;
     IPairAPI public pairAPI;
+    IVoterV3 public voterV3;
 
     function setUp() public {
         string memory SEI_DEV_RPC_URL = "https://evm-rpc-arctic-1.sei-apis.com";
         seiDevFork = vm.createFork(SEI_DEV_RPC_URL);
         pairAPI = IPairAPI(pairAPIAddress);
+        voterV3 = IVoterV3(voterAddress);
     }
 
     // forge test --match-path test/PairAPI.t.sol --match-contract PairAPITest --match-test test_getAllPair --fork-url=https://evm-rpc-arctic-1.sei-apis.com
@@ -116,6 +123,16 @@ contract PairAPITest is Test {
             console2.log("--------");
 
         }
+
+    }
+
+     // forge test --match-path test/PairAPI.t.sol --match-contract PairAPITest --match-test test_createGuage --fork-url=https://evm-rpc-arctic-1.sei-apis.com
+    function test_createGuage() public {
+        vm.selectFork(seiDevFork);
+        address pool = 0xAEc12dF3B29A7eC4213aB14Fdd781D5d2C829760;
+
+        (address _gauge, address _internal_bribe, address _external_bribe) = voterV3.createGauge(pool, 0);
+        console2.log("_gauge:%s,_internal_bribe:%s,_external_bribe:%s", _gauge, _internal_bribe, _external_bribe);
     }
 
 
