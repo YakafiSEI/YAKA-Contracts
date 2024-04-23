@@ -572,10 +572,10 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
         // create internal and external bribe
         address _owner = IPermissionsRegistry(permissionRegistry).thenaTeamMultisig();
-        string memory _type =  string.concat("Thena LP Fees: ", IERC20(_pool).symbol() );
+        string memory _type =  string.concat("Yaka LP Fees: ", IERC20(_pool).symbol() );
         _internal_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
-        _type = string.concat("Thena Bribes: ", IERC20(_pool).symbol() );
+        _type = string.concat("Yaka Bribes: ", IERC20(_pool).symbol() );
         _external_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
         // create gauge
