@@ -571,7 +571,7 @@ contract VoterV3 is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
         // create internal and external bribe
-        address _owner = IPermissionsRegistry(permissionRegistry).thenaTeamMultisig();
+        address _owner = IPermissionsRegistry(permissionRegistry).yakaTeamMultisig();
         string memory _type =  string.concat("Yaka LP Fees: ", IERC20(_pool).symbol() );
         _internal_bribe = IBribeFactory(bribefactory).createBribe(_owner, tokenA, tokenB, _type);
 
