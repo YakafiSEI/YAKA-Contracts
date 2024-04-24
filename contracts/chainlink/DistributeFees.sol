@@ -2,7 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "./AutomationCompatibleInterface.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 interface IVoter {
     function length() external view returns (uint);
     function pools(uint index) external view returns (address);
@@ -13,7 +14,7 @@ interface IVoter {
 }
 
 
-contract DistributeFees is AutomationCompatibleInterface, OwnableUpgradeable {
+contract DistributeFees is AutomationCompatibleInterface, Ownable {
 
     // lock checkUpkeep during performupkeep
     bool internal lock;
@@ -34,17 +35,28 @@ contract DistributeFees is AutomationCompatibleInterface, OwnableUpgradeable {
     // remove a gauge from distribution, used in case of gauge with tax token not whitelisted and blocking automation
     mapping(address => bool) public lockedGauge;
 
-
-    function initialize(address _voter, uint256 _maxLoops) public initializer {
-          voter = IVoter(_voter);
+    constructor(address _voter, uint256 _maxLoops) {
+        voter = IVoter(_voter);
         maxLoops = _maxLoops;
-        lockedGauge[address(0xd9694Bb4538596dF94Cc6A76145560097865Bba4)] = true;
+        //lockedGauge[address(0xd9694Bb4538596dF94Cc6A76145560097865Bba4)] = true;
+        // init with last automation run data
+        lastCompletedAt = 1701093914;
+        deltaTimestamp = 259219;
+        lock = false;
+    }
+
+
+    /*function initialize(address _voter, uint256 _maxLoops) public initializer {
+        __Ownable_init();
+        voter = IVoter(_voter);
+        maxLoops = _maxLoops;
+        //lockedGauge[address(0xd9694Bb4538596dF94Cc6A76145560097865Bba4)] = true;
         // init with last automation run data
         lastCompletedAt = 1701093914;
         deltaTimestamp = 259219;
         lock = false;
 
-    }
+    }*/
 
     function lockGauge(address[] memory gauges) external onlyOwner {
         uint i = 0;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./Router.sol";
+import "./RouterV2.sol";
 import "./interfaces/IPair.sol";
 import "./interfaces/IERC20.sol";
 
@@ -13,7 +13,7 @@ contract SeiCampaignStage2 {
     }
     
     address public admin;
-    Router public router;
+    RouterV2 public router;
 
     address[] public pairs;
     mapping(address => bool) public pairWhiteList;
@@ -35,13 +35,13 @@ contract SeiCampaignStage2 {
 
     constructor(address _router) {
         admin = msg.sender;
-        router = Router(payable(address(_router)));
+        router = RouterV2(payable(address(_router)));
     }
 
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
-        Router.route[] calldata routes,
+        RouterV2.route[] calldata routes,
         uint256 deadline,
         address inviter
     ) external ensure(deadline) returns (uint256[] memory amounts) {
