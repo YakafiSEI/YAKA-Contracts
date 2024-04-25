@@ -109,6 +109,9 @@ contract SeiCampaignStage2 {
         return router.removeLiquidity(tokenA, tokenB, stable, liquidity, amountAMin, amountBMin, msg.sender, deadline);
     }
 
+    function getUserCnt() external view returns (uint256) {
+        return users.length;
+    }
 
     function getPoints(address user) external view returns(uint256, uint256, uint256) {
         return _getPoints(user);
