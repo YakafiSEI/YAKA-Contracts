@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "forge-std/console2.sol";
 import "./RouterV2.sol";
 import "./interfaces/IPair.sol";
 import "./interfaces/IERC20.sol";
@@ -146,7 +147,7 @@ contract SeiCampaignStage2 {
                 swapPoints += 20;
             }
 
-            if (swapCntOf[user][pair] > 0) {
+            if (depositCntOf[user][pair] > 0) {
                 depositPoints += 30;
             }
         }
@@ -208,6 +209,13 @@ contract SeiCampaignStage2 {
 
     function addPair(address _pair) external {
         require(msg.sender == admin, "not admin");
+        uint256 len = pairs.length;
+        for (uint256 i=0; i < len; i++) {
+            if (_pair == pairs[i]) {
+                revert("same pair.");
+            }
+        }
+
         pairs.push(_pair);
         pairWhiteList[_pair] = true;
 
@@ -224,4 +232,11 @@ contract SeiCampaignStage2 {
         require(success && (data.length == 0 || abi.decode(data, (bool))));
     }
 
+    function getSwapCntOf(address user, address pool) external view returns(uint256) {
+        return swapCntOf[user][pool];
+    }
+
+    function getDepositCntOf(address user, address pool) external view returns(uint256) {
+        return depositCntOf[user][pool];
+    }
 }
