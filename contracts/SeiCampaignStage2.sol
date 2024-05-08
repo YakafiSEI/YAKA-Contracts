@@ -24,9 +24,9 @@ contract SeiCampaignStage2 {
 
     mapping(address => mapping(address => uint32)) public swapCntOf;//user=>pool=>cnt
     mapping(address => mapping(address => uint32)) public depositCntOf;//user=>pool=>cnt
-    mapping(address => uint256) public invitedCntOf;//邀请数
+    mapping(address => uint256) public invitedCntOf;
 
-    mapping(address => address) public superiorOf;//上级
+    mapping(address => address) public superiorOf;
 
     mapping(address => bool) public swapBadgeOf;
     mapping(address => bool) public depositBadgeOf;
@@ -46,14 +46,13 @@ contract SeiCampaignStage2 {
         uint256 deadline,
         address inviter
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-
         inviteUser(msg.sender, inviter);
         updateBadge(msg.sender, true);
 
         address pair = router.pairFor(routes[0].from, routes[0].to, routes[0].stable);
         require(pairWhiteList[pair], "pair is not WL.");
-
-        _safeTransferFrom(routes[0].from, msg.sender, address(this), amounts[0]);
+        
+        _safeTransferFrom(routes[0].from, msg.sender, address(this), amountIn);
 
         addSwapPoint(msg.sender, pair);
         return router.swapExactTokensForTokens(amountIn, amountOutMin, routes, msg.sender, deadline);
@@ -81,13 +80,24 @@ contract SeiCampaignStage2 {
             address pair = router.pairFor(tokenA, tokenB, stable);
             require(pairWhiteList[pair], "pair is not WL.");
 
-            _safeTransferFrom(tokenA, msg.sender, address(this), amountA);
-            _safeTransferFrom(tokenB, msg.sender, address(this), amountB);
+            _safeTransferFrom(tokenA, msg.sender, address(this), amountADesired);
+            _safeTransferFrom(tokenB, msg.sender, address(this), amountBDesired);
 
             addDepositPoint(msg.sender, pair);
         }
-        
-        return router.addLiquidity(tokenA, tokenB, stable, amountADesired, amountBDesired, amountAMin, amountBMin, msg.sender, deadline);
+
+        (amountA, amountB, liquidity) = router.addLiquidity(tokenA, tokenB, stable, amountADesired, amountBDesired, amountAMin, amountBMin, msg.sender, deadline);
+        {
+            refund(tokenA);
+            refund(tokenB);
+        }
+    }
+
+    function refund(address token) internal {
+        uint256 balance = IERC20(token).balanceOf(address(this));
+        if (balance > 0) {
+            IERC20(token).transfer(msg.sender, balance);
+        }
     }
 
     function removeLiquidity(
@@ -220,9 +230,11 @@ contract SeiCampaignStage2 {
         pairWhiteList[_pair] = true;
 
         (address tokenA, address tokenB) = IPair(_pair).tokens();
-        IERC20(tokenA).approve(_pair, type(uint256).max);
-        IERC20(tokenB).approve(_pair, type(uint256).max);
-        IERC20(_pair).approve(_pair, type(uint256).max);
+        IERC20(tokenA).approve(address(router), type(uint256).max);
+
+        IERC20(tokenB).approve(address(router), type(uint256).max);
+        
+        IERC20(_pair).approve(address(router), type(uint256).max);
     }
 
     function _safeTransferFrom(address token, address from, address to, uint256 value) internal {
