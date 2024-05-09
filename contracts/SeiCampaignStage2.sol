@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "forge-std/console2.sol";
 import "./RouterV2.sol";
 import "./interfaces/IPair.sol";
 import "./interfaces/IERC20.sol";
