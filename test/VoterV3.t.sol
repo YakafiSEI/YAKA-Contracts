@@ -25,7 +25,7 @@ contract VoterV3Test is BaseTest {
     PairFactory pairFactory;
     GaugeFactoryV2 gaugeFactory;
     BribeFactoryV3 bribeFactory;
-    RouterV2 router;
+    // RouterV2 router;
 
     MockERC20 SKY;
 

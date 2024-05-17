@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "./RouterV2.sol";
 import "./interfaces/IPair.sol";
 import "./interfaces/IERC20.sol";
+import "forge-std/console2.sol";
 
 contract SeiCampaignStage2 {
 
@@ -31,11 +32,13 @@ contract SeiCampaignStage2 {
     mapping(address => bool) public depositBadgeOf;
     mapping(address => bool) public inviteBadgeOf;
 
+    address public weth;
 
-
-    constructor(address _router) {
+    constructor(address _router, address _weth) {
         admin = msg.sender;
         router = RouterV2(payable(address(_router)));
+        IERC20(_weth).approve(_router, type(uint256).max);
+        weth = _weth;
     }
 
     function swapExactTokensForTokens(
@@ -55,6 +58,46 @@ contract SeiCampaignStage2 {
 
         addSwapPoint(msg.sender, pair);
         return router.swapExactTokensForTokens(amountIn, amountOutMin, routes, msg.sender, deadline);
+    }
+
+    function swapExactETHForTokens(
+        uint amountOutMin, 
+        RouterV2.route[] calldata routes,
+        uint deadline,
+        address inviter
+    ) external payable ensure(deadline) returns (uint[] memory amounts) {
+        
+        require(routes[0].from == address(weth), 'SeiCampaignStage2: INVALID_WSEI_PATH');
+
+        inviteUser(msg.sender, inviter);
+        updateBadge(msg.sender, true);
+
+        address pair = router.pairFor(routes[0].from, routes[0].to, routes[0].stable);
+        require(pairWhiteList[pair], "pair is not WL.");
+
+        addSwapPoint(msg.sender, pair);
+        return router.swapExactETHForTokens{value : msg.value}(amountOutMin, routes, msg.sender, deadline);
+    }
+
+    function swapExactTokensForETH(
+        uint amountIn, 
+        uint amountOutMin, 
+        RouterV2.route[] calldata routes, 
+        uint deadline,
+        address inviter
+    ) external ensure(deadline) returns (uint[] memory amounts) {
+        require(routes[routes.length - 1].to == address(weth), 'SeiCampaignStage2: INVALID_WSEI_PATH');
+
+        inviteUser(msg.sender, inviter);
+        updateBadge(msg.sender, true);
+
+        address pair = router.pairFor(routes[0].from, routes[0].to, routes[0].stable);
+        require(pairWhiteList[pair], "pair is not WL.");
+
+        _safeTransferFrom(routes[0].from, msg.sender, address(this), amountIn);
+
+        addSwapPoint(msg.sender, pair);
+        return router.swapExactTokensForETH(amountIn, amountOutMin, routes, msg.sender, deadline);
     }
 
 
@@ -91,6 +134,36 @@ contract SeiCampaignStage2 {
             refund(tokenB);
         }
     }
+
+    function addLiquidityETH(
+        address token,
+        bool stable,
+        uint256 amountTokenDesired,
+        uint256 amountTokenMin,
+        uint256 amountETHMin,
+        uint256 deadline,
+        address inviter
+    ) external payable ensure(deadline) returns (uint256 amountToken, uint256 amountETH, uint256 liquidity) {
+        {
+            inviteUser(msg.sender, inviter);
+            updateBadge(msg.sender, false);
+        }
+
+        {
+            address pair = router.pairFor(token, address(weth), stable);
+            require(pairWhiteList[pair], "pair is not WL.");
+
+            _safeTransferFrom(token, msg.sender, address(this), amountTokenDesired);
+            addDepositPoint(msg.sender, pair);
+        }
+        (amountToken, amountETH, liquidity) = router.addLiquidityETH{value : msg.value}(token, stable, amountTokenDesired, amountTokenMin, amountETHMin, msg.sender, deadline);
+
+        {
+            refund(token);
+            if (msg.value > amountETH) _safeTransferETH(msg.sender, msg.value - amountETH);
+        }
+    }
+
 
     function refund(address token) internal {
         uint256 balance = IERC20(token).balanceOf(address(this));
@@ -243,6 +316,11 @@ contract SeiCampaignStage2 {
         require(success && (data.length == 0 || abi.decode(data, (bool))));
     }
 
+    function _safeTransferETH(address to, uint256 value) internal {
+        (bool success,) = to.call{value:value}(new bytes(0));
+        require(success, 'TransferHelper: ETH_TRANSFER_FAILED');
+    }
+
     function getSwapCntOf(address user, address pool) external view returns(uint256) {
         return swapCntOf[user][pool];
     }
@@ -250,4 +328,14 @@ contract SeiCampaignStage2 {
     function getDepositCntOf(address user, address pool) external view returns(uint256) {
         return depositCntOf[user][pool];
     }
+
+    function getAllPairs() external view returns(address[] memory) {
+        uint256 len = pairs.length;
+        address[] memory allPairs = new address[](len);
+        for (uint256 i=0; i<len; ++i) {
+            allPairs[i] = pairs[i];
+        }
+        return allPairs;
+    }
+
 }
