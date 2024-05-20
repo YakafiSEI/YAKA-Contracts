@@ -157,11 +157,7 @@ contract SeiCampaignStage2 {
             addDepositPoint(msg.sender, pair);
         }
         (amountToken, amountETH, liquidity) = router.addLiquidityETH{value : msg.value}(token, stable, amountTokenDesired, amountTokenMin, amountETHMin, msg.sender, deadline);
-
-        {
-            refund(token);
-            if (msg.value > amountETH) _safeTransferETH(msg.sender, msg.value - amountETH);
-        }
+        refund(token);
     }
 
 
@@ -314,11 +310,6 @@ contract SeiCampaignStage2 {
         (bool success, bytes memory data) =
         token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))));
-    }
-
-    function _safeTransferETH(address to, uint256 value) internal {
-        (bool success,) = to.call{value:value}(new bytes(0));
-        require(success, 'TransferHelper: ETH_TRANSFER_FAILED');
     }
 
     function getSwapCntOf(address user, address pool) external view returns(uint256) {
