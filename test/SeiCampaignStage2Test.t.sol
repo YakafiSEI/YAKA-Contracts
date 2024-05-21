@@ -68,7 +68,7 @@ contract SeiCampaignStage2Test is BaseTest {
         POOL_1 = router.pairFor(address(token1), address(token2), false);
         IERC20(POOL_1).approve(address(seiCampaignStage2), 1000000000);
 
-        seiCampaignStage2 = new SeiCampaignStage2(address(router), address(weth));
+        seiCampaignStage2 = new SeiCampaignStage2(address(router), address(weth), address(voter));
         token1.approve(address(seiCampaignStage2), 1000000000);
         token2.approve(address(seiCampaignStage2), 1000000000);
         console2.log("POOL_1", POOL_1);
@@ -152,7 +152,7 @@ contract SeiCampaignStage2Test is BaseTest {
         uint256 depositCnt = seiCampaignStage2.getDepositCntOf(Alice, POOL_1);
         console2.log("Alice swapCnt: %s, depositCnt:%s", swapCnt, depositCnt);
 
-        (uint256 sp, uint256 dp, uint256 ip) = seiCampaignStage2.getPoints(Alice);
+        (uint256 sp, uint256 dp, uint256 ip, uint256 lp, uint256 vp) = seiCampaignStage2.getPoints(Alice);
         console2.log("Alice sp:%s, dp:%s, ip:%s", sp, dp, ip);
 
         uint256 inviteCnt = seiCampaignStage2.invitedCntOf(Alice);
@@ -166,7 +166,7 @@ contract SeiCampaignStage2Test is BaseTest {
         swapCnt = seiCampaignStage2.getSwapCntOf(Bob, POOL_1);
         depositCnt = seiCampaignStage2.getDepositCntOf(Bob, POOL_1);
         console2.log("Bob swapCnt: %s, depositCnt:%s", swapCnt, depositCnt);
-        (sp, dp, ip) = seiCampaignStage2.getPoints(Bob);
+        (sp, dp, ip, lp, vp) = seiCampaignStage2.getPoints(Bob);
         console2.log("Bob sp:%s, dp:%s, ip:%s", sp, dp, ip);
 
         vm.roll(5);
@@ -174,7 +174,7 @@ contract SeiCampaignStage2Test is BaseTest {
         swapCnt = seiCampaignStage2.getSwapCntOf(Chris, POOL_1);
         depositCnt = seiCampaignStage2.getDepositCntOf(Chris, POOL_1);
         console2.log("Chris swapCnt: %s, depositCnt:%s", swapCnt, depositCnt);
-        (sp, dp, ip) = seiCampaignStage2.getPoints(Chris);
+        (sp, dp, ip, lp, vp) = seiCampaignStage2.getPoints(Chris);
         console2.log("Chris sp:%s, dp:%s, ip:%s", sp, dp, ip);
 
         inviteCnt = seiCampaignStage2.invitedCntOf(Bob);

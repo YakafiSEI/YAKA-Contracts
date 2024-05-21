@@ -4,6 +4,9 @@ pragma solidity ^0.8.20;
 import "./RouterV2.sol";
 import "./interfaces/IPair.sol";
 import "./interfaces/IERC20.sol";
+import {IVotingEscrow} from "./interfaces/IVotingEscrow.sol";
+import {IVoter} from "./interfaces/IVoter.sol";
+
 import "forge-std/console2.sol";
 
 contract SeiCampaignStage2 {
@@ -12,9 +15,19 @@ contract SeiCampaignStage2 {
         require(deadline >= block.timestamp, 'SeiCampaignStage2: EXPIRED');
         _;
     }
+
+    struct Info {
+        uint256 swap;
+        uint256 deposit;
+        uint256 invite;
+        uint256 lock;
+        uint256 vote;
+    }
     
     address public admin;
     RouterV2 public router;
+    address public ve;
+    address public yaka;
 
     address[] public pairs;
     mapping(address => bool) public pairWhiteList;
@@ -25,20 +38,29 @@ contract SeiCampaignStage2 {
     mapping(address => mapping(address => uint32)) public swapCntOf;//user=>pool=>cnt
     mapping(address => mapping(address => uint32)) public depositCntOf;//user=>pool=>cnt
     mapping(address => uint256) public invitedCntOf;
+    mapping(address => uint256) public lockedCntOf;
+    mapping(address => uint256) public votededCntOf;
 
     mapping(address => address) public superiorOf;
 
     mapping(address => bool) public swapBadgeOf;
     mapping(address => bool) public depositBadgeOf;
     mapping(address => bool) public inviteBadgeOf;
+    mapping(address => bool) public lockBadgeOf;
+    mapping(address => bool) public voteBadgeOf;
 
     address public weth;
 
-    constructor(address _router, address _weth) {
+    constructor(address _router, address _weth, address _voter) {
         admin = msg.sender;
         router = RouterV2(payable(address(_router)));
         IERC20(_weth).approve(_router, type(uint256).max);
         weth = _weth;
+
+        address _ve = IVoter(_voter).ve();
+        ve = _ve;
+        address yaka = IVotingEscrow(_ve).token();
+        IERC20(yaka).approve(_router, type(uint256).max);
     }
 
     function swapExactTokensForTokens(
@@ -188,48 +210,91 @@ contract SeiCampaignStage2 {
         return router.removeLiquidity(tokenA, tokenB, stable, liquidity, amountAMin, amountBMin, msg.sender, deadline);
     }
 
+    function create_lock_for(uint256 _value, uint256 _lock_duration, address _to, address inviter) external returns (uint256) {
+
+        inviteUser(msg.sender, inviter);
+
+        bool hasLocked = lockBadgeOf[msg.sender];
+        lockedCntOf[msg.sender] += 1;
+        if (!hasLocked) {
+            lockBadgeOf[msg.sender] = true;
+        }
+
+        _safeTransferFrom(yaka, msg.sender, address(this), _value);
+        return IVotingEscrow(ve).create_lock_for(_value, _lock_duration, _to);
+    }
+
+    function verifyVote(uint256 id, address inviter) external returns(bool) {
+
+        inviteUser(msg.sender, inviter);
+
+        require(IVotingEscrow(ve).ownerOf(id) == msg.sender, "Not veToken owner.");
+        bool hasVoted = voteBadgeOf[msg.sender];
+        if (!hasVoted) {
+            votededCntOf[msg.sender] += 1;
+            hasVoted = IVotingEscrow(ve).voted(id);
+            if (hasVoted) {
+                voteBadgeOf[msg.sender] = true;
+            }
+        } else {
+            return true;
+        }
+    }
+
     function getUserCnt() external view returns (uint256) {
         return users.length;
     }
 
-    function getPoints(address user) external view returns(uint256, uint256, uint256) {
-        return _getPoints(user);
+    function getPoints(address user) external view returns(uint256, uint256, uint256, uint256, uint256) {
+        Info memory info = _getUserDetail(user);
+        return (info.swap, info.deposit, info.invite, info.lock, info.vote);
     }
 
-    function batchGetPoints(uint256 start, uint256 end) external view returns(address[] memory, uint256[] memory) {
+    function batchGetUserInfo(uint256 start, uint256 end) external view returns (address[] memory, Info[] memory) {
         uint256 len = users.length;
         require(start < end);
         require(end <= len);
 
         address[] memory _users = new address[](end - start);
-        uint256[] memory points = new uint256[](end - start);
+        Info[] memory infos = new Info[](end - start);
+
         uint256 j=0;
         for (uint256 i = start; i < end; i++) {
             address user = users[i];
-            (uint256 swapPoints, uint256 depositPoints, uint256 invitedPoints) = _getPoints(user);
+            
             _users[j] = user;
-            points[j] = swapPoints + depositPoints + invitedPoints;
+            infos[j] = _getUserDetail(user);
             ++j;
         }
-        return (_users, points);
-    } 
+    }
 
-    function _getPoints(address user) internal view returns(uint256, uint256, uint256) {
+    function getUserInfo(address user) external view returns(Info memory) {
+        return _getUserDetail(user);
+    }
+
+    function _getUserDetail(address user) internal view returns(Info memory info) {
         uint256 len = pairs.length;
         uint256 swapPoints;
         uint256 depositPoints;
         uint256 invitedPoints = invitedCntOf[user];
+        uint256 lockedCnt = lockedCntOf[user];
+        uint256 votededCnt = votededCntOf[user];
         for (uint256 i = 0; i < len; ++i) {
             address pair = pairs[i];
             if (swapCntOf[user][pair] > 0) {
-                swapPoints += 20;
+                swapPoints += 1;
             }
 
             if (depositCntOf[user][pair] > 0) {
-                depositPoints += 30;
+                depositPoints += 1;
             }
         }
-        return (swapPoints, depositPoints, invitedPoints);
+        info.swap = swapPoints;
+        info.deposit = depositPoints;
+        info.invite = invitedPoints;
+        info.lock = lockedCnt;
+        info.vote = votededCnt;
+        return info;
     }
 
     function inviteUser(address user, address inviter) internal {
@@ -328,5 +393,4 @@ contract SeiCampaignStage2 {
         }
         return allPairs;
     }
-
 }
