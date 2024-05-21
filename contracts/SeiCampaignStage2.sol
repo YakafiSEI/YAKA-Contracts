@@ -59,8 +59,8 @@ contract SeiCampaignStage2 {
 
         address _ve = IVoter(_voter).ve();
         ve = _ve;
-        address yaka = IVotingEscrow(_ve).token();
-        IERC20(yaka).approve(_router, type(uint256).max);
+        yaka = IVotingEscrow(_ve).token();
+        IERC20(yaka).approve(_ve, type(uint256).max);
     }
 
     function swapExactTokensForTokens(
@@ -231,14 +231,14 @@ contract SeiCampaignStage2 {
         require(IVotingEscrow(ve).ownerOf(id) == msg.sender, "Not veToken owner.");
         bool hasVoted = voteBadgeOf[msg.sender];
         if (!hasVoted) {
-            votededCntOf[msg.sender] += 1;
+            votededCntOf[msg.sender] = 1;
             hasVoted = IVotingEscrow(ve).voted(id);
             if (hasVoted) {
                 voteBadgeOf[msg.sender] = true;
+                return true;
             }
-        } else {
-            return true;
-        }
+        } 
+        return hasVoted;
     }
 
     function getUserCnt() external view returns (uint256) {
@@ -298,7 +298,7 @@ contract SeiCampaignStage2 {
     }
 
     function inviteUser(address user, address inviter) internal {
-                
+        require(user != inviter, "same address");
         if (boardingTimeOf[user] != 0) {
             return;
         }

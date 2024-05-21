@@ -3,9 +3,9 @@ pragma solidity 0.8.20;
 import "./BaseTest.sol";
 
 import {PermissionsRegistry} from "../contracts/PermissionsRegistry.sol";
-import {PairFactory} from "../contracts/factories/PairFactory.sol";
-import {GaugeFactoryV2} from "../contracts/factories/GaugeFactoryV2.sol";
-import {BribeFactoryV3} from "../contracts/factories/BribeFactoryV3.sol";
+// import {PairFactory} from "../contracts/factories/PairFactory.sol";
+// import {GaugeFactoryV2} from "../contracts/factories/GaugeFactoryV2.sol";
+// import {BribeFactoryV3} from "../contracts/factories/BribeFactoryV3.sol";
 
 import {VoterV3} from "../contracts/VoterV3.sol";
 import {RouterV2} from "../contracts/RouterV2.sol";
@@ -21,10 +21,10 @@ contract VoterV3Test is BaseTest {
     address public musk = address(100);
 
     // contract
-    PermissionsRegistry permissionsRegistry;
+    // PermissionsRegistry permissionsRegistry;
     PairFactory pairFactory;
-    GaugeFactoryV2 gaugeFactory;
-    BribeFactoryV3 bribeFactory;
+    // GaugeFactoryV2 gaugeFactory;
+    // BribeFactoryV3 bribeFactory;
     // RouterV2 router;
 
     MockERC20 SKY;
@@ -118,7 +118,7 @@ contract VoterV3Test is BaseTest {
         // init contract
         vm.startPrank(musk);
 
-        permissionsRegistry = new PermissionsRegistry();
+        // permissionsRegistry = new PermissionsRegistry();
         pairFactory = new PairFactory();
         gaugeFactory = new GaugeFactoryV2();
         gaugeFactory.initialize(address(permissionsRegistry));
