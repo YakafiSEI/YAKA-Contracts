@@ -7,6 +7,9 @@ import "./interfaces/IInitialDistributor.sol";
 import "./Minter.sol";
 
 contract InitialDistributor is IInitialDistributor {
+    event SetMinter(address indexed _minter);
+    event SetStartPeriod(uint256 indexed _start_period);
+    event SetAdmin(address indexed _admin);
     /*//////////////////////////////////////////////////////////////
                                 MODIFIERS
     //////////////////////////////////////////////////////////////*/
@@ -55,10 +58,6 @@ contract InitialDistributor is IInitialDistributor {
     uint256 public constant MAX_SUPPLY_OF_TEAM = 16_000_000 * 1e18;
     uint256 public constant MAX_VE_SUPPLY_OF_TEAM = 16_000_000 * 1e18;
     ReleaseRuleInfo public releaseRuleInfoOfTeam;
-
-    uint256 public constant MAX_SUPPLY_OF_VESTOR = 6_000_000 * 1e18;
-    uint256 public supplyOfVestor;
-    mapping(address => ReleaseRuleInfo) whitelistOfVestor;
 
     uint256 public constant DEFAULT_LOCK_DURATION = 104 weeks;
     uint256 public constant CLIFF_DURATION = 26 weeks;
@@ -174,7 +173,9 @@ contract InitialDistributor is IInitialDistributor {
 
 
     function claimForPresale() external nonreentrant {
-        require(block.timestamp > start_period, "cannot claim yet");
+        uint256 _start_period = start_period;
+        require(_start_period > 0, "not start");
+        require(block.timestamp > _start_period, "cannot claim yet");
 
         (uint256 amount1, uint256 amount2) = _claimableForPresale(msg.sender);
         if (amount1 > 0) {
@@ -233,20 +234,19 @@ contract InitialDistributor is IInitialDistributor {
     function claimForPartner(
         bool _isStage1
     ) external nonreentrant {
-        uint256 _start_time = start_period;
-        require(block.timestamp > _start_time, "cannot claim yet");
+        uint256 _start_period = start_period;
+        require(_start_period > 0, "not start");
+        require(block.timestamp > _start_period, "cannot claim yet");
 
         ReleaseRuleInfo memory info;
         if (_isStage1) {
             info = whitelistOfPartner1[msg.sender];
-            whitelistOfPartner1[msg.sender].veAmount = 0;
         } else {
             info = whitelistOfPartner2[msg.sender];
-            whitelistOfPartner2[msg.sender].veAmount = 0;
         }
         require(info.totalAmount > 0, "Not in the WL.");
 
-        uint256 releaseAmount = _claimableForPartner(info, _start_time);
+        uint256 releaseAmount = _claimableForPartner(info, _start_period);
         require(releaseAmount > 0, "Has beem claimed.");
         ve.create_lock_for(releaseAmount, DEFAULT_LOCK_DURATION, msg.sender);
 
@@ -298,11 +298,12 @@ contract InitialDistributor is IInitialDistributor {
     ReleaseRuleInfo public releaseRuleInfoOfTreasury;
 
     function claimForTreasury() external nonreentrant {
-        uint256 _start_time = start_period;
-        require(block.timestamp > (_start_time + 1 weeks), "cannot claim yet");
+        uint256 _start_period = start_period;
+        require(_start_period > 0, "not start");
+        require(block.timestamp > (_start_period + 1 weeks), "cannot claim yet");
 
         ReleaseRuleInfo memory ruleInfo = releaseRuleInfoOfTreasury;
-        uint256 transferAmount = _claimableAmount(ruleInfo, _start_time);
+        uint256 transferAmount = _claimableAmount(ruleInfo, _start_period);
         if (transferAmount > 0) {
             releaseRuleInfoOfTreasury.claimedAmount += transferAmount;
         }
@@ -315,8 +316,9 @@ contract InitialDistributor is IInitialDistributor {
                              TEAM
     //////////////////////////////////////////////////////////////*/
     function claimForTeam() external nonreentrant {
-        uint256 _start_time = start_period;
-        require(block.timestamp > start_period, "cannot claim yet");
+        uint256 _start_period = start_period;
+        require(_start_period > 0, "not start");
+        require(block.timestamp > _start_period, "cannot claim yet");
         ReleaseRuleInfo memory ruleInfo = releaseRuleInfoOfTeam;
         address _team = team;
 
@@ -327,7 +329,7 @@ contract InitialDistributor is IInitialDistributor {
             return;
         }
 
-        uint256 transferAmount = _claimableAmount(ruleInfo, _start_time);
+        uint256 transferAmount = _claimableAmount(ruleInfo, _start_period);
         if (transferAmount > 0) {
             releaseRuleInfoOfTeam.claimedAmount += transferAmount;
         }
@@ -384,10 +386,6 @@ contract InitialDistributor is IInitialDistributor {
         uint256 amount2 = amountOfTokenSale2[_to];
         uint256 claimedTime = claimedTimeOfTokenSale[_to];
 
-        if (claimedTime == 0) {
-            claimedTime = start_period;
-        }
-
         if (block.timestamp > (start_period + 12 weeks)) {
             return (amount1, amount2 - claimedAmountOfTokenSale[_to]);
         }
@@ -400,7 +398,9 @@ contract InitialDistributor is IInitialDistributor {
 
 
     function claimForTokenSale() external nonreentrant {
-        require(block.timestamp > start_period, "cannot claim yet");
+        uint256 _start_period = start_period;
+        require(_start_period > 0, "not start");
+        require(block.timestamp > _start_period, "cannot claim yet");
 
         (uint256 amount1, uint256 amount2) = _claimableForTokenSale(msg.sender);
         if (amount1 > 0) {
@@ -443,15 +443,18 @@ contract InitialDistributor is IInitialDistributor {
 
     function setMinter(address _minter) external onlyAdmin {
         minter = _minter;
+        emit SetMinter(_minter);
     }
 
     function setStartPeriod(uint256 _start_period) external {
         require(msg.sender == minter, "");
-        start_period = _start_period;        
+        start_period = _start_period;       
+        emit SetStartPeriod(_minter); 
     }
 
     function setAdmin(address _admin) external onlyAdmin {
         adminRoles[_admin] = true;
+        event SetAdmin(_admin);
     }
 
     function checkAdmin(address _admin) internal view {
