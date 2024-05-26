@@ -449,12 +449,12 @@ contract InitialDistributor is IInitialDistributor {
     function setStartPeriod(uint256 _start_period) external {
         require(msg.sender == minter, "");
         start_period = _start_period;       
-        emit SetStartPeriod(_minter); 
+        emit SetStartPeriod(_start_period); 
     }
 
     function setAdmin(address _admin) external onlyAdmin {
         adminRoles[_admin] = true;
-        event SetAdmin(_admin);
+        emit SetAdmin(_admin);
     }
 
     function checkAdmin(address _admin) internal view {
