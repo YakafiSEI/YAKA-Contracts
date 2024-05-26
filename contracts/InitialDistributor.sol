@@ -454,7 +454,7 @@ contract InitialDistributor is IInitialDistributor {
 
     function setAdmin(address _admin) external onlyAdmin {
         adminRoles[_admin] = true;
-        emit event SetAdmin(_admin);
+        emit SetAdmin(_admin);
     }
 
     function checkAdmin(address _admin) internal view {
