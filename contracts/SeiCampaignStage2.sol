@@ -266,6 +266,7 @@ contract SeiCampaignStage2 {
             infos[j] = _getUserDetail(user);
             ++j;
         }
+        return (_users, infos);
     }
 
     function getUserInfo(address user) external view returns(Info memory) {
@@ -393,4 +394,6 @@ contract SeiCampaignStage2 {
         }
         return allPairs;
     }
+
+    receive() external payable {}
 }
