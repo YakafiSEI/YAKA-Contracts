@@ -15,12 +15,13 @@ async function main () {
     
     router = contracts_deployed['Router']
     const wseiAddress = contracts_deployed['WSEI']
+    const voter = contracts_deployed['VoterV3']
 
-    console.log(" router:%s", router);
+    console.log(" router:%s, wseiAddress:%s,voter:%s", router,wseiAddress, voter);
 
 
     data = await ethers.getContractFactory("SeiCampaignStage2");
-    SeiCampaignStage2 = await data.deploy(router, wseiAddress);
+    SeiCampaignStage2 = await data.deploy(router, wseiAddress, voter);
     txDeployed = await SeiCampaignStage2.deployed();
     console.log("SeiCampaignStage2: ", SeiCampaignStage2.address);
 
