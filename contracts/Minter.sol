@@ -122,6 +122,11 @@ contract Minter is IMinter {
         REBASEMAX = _rebase;
     }
 
+    function setOwner() external {
+        require(msg.sender == owner, "not owner");
+        owner = msg.sender;
+    }
+
     // calculate circulating supply as total token supply - locked supply
     function circulating_supply() public view returns (uint) {
         return _yaka.totalSupply() - _yaka.balanceOf(address(_ve));
