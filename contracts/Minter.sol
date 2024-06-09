@@ -122,9 +122,9 @@ contract Minter is IMinter {
         REBASEMAX = _rebase;
     }
 
-    function setOwner() external {
+    function setOwner(address _owner) external {
         require(msg.sender == owner, "not owner");
-        owner = msg.sender;
+        owner = _owner;
     }
 
     // calculate circulating supply as total token supply - locked supply
