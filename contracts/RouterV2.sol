@@ -86,9 +86,10 @@ contract RouterV2 {
     }
 
     address public immutable factory;
-    IWETH public immutable wETH;
+    IWETH public wETH;
     uint internal constant MINIMUM_LIQUIDITY = 10**3;
     bytes32 immutable pairCodeHash;
+    address public owner;
 
     
     // swap event for the referral system
@@ -103,10 +104,21 @@ contract RouterV2 {
         factory = _factory;
         pairCodeHash = IBaseV1Factory(_factory).pairCodeHash();
         wETH = IWETH(_wETH);
+        owner = msg.sender;
     }
 
     receive() external payable {
         assert(msg.sender == address(wETH)); // only accept ETH via fallback from the WETH contract
+    }
+
+    function setWeth(address _wETH) external {
+        require(msg.sender == owner, "not owner");
+        wETH = IWETH(_wETH);
+    }
+
+    function setOwner(address _owner) external {
+        require(msg.sender == owner, "not owner");
+        owner = _owner;
     }
 
     function sortTokens(address tokenA, address tokenB) public pure returns (address token0, address token1) {

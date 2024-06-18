@@ -67,6 +67,12 @@ module.exports = {
       accounts: PRIVATEKEY,
       allowUnlimitedContractSize: true
     },
+    sei_test : {
+      url: "https://evm-rpc-testnet.sei-apis.com",
+      chainId: 1328,
+      accounts: PRIVATEKEY,
+      allowUnlimitedContractSize: true
+    },
     sepolia : {
       url: "https://eth-sepolia.g.alchemy.com/v2/BrzpjuiAd7D6jCuR3FXfB0LH_A5ClzsD",
       chainId: 11155111,
