@@ -91,16 +91,14 @@ contract BribeFactoryV3 is OwnableUpgradeable {
     }
 
     /// @notice set the bribe factory permission registry
-    function pushDefaultRewardToken(address _token) external {
-        require(owner() == msg.sender, 'not owner');
+    function pushDefaultRewardToken(address _token) external onlyAllowed {
         require(_token != address(0));
         defaultRewardToken.push(_token);    
     }
 
     
     /// @notice set the bribe factory permission registry
-    function removeDefaultRewardToken(address _token) external {
-        require(owner() == msg.sender, 'not owner');
+    function removeDefaultRewardToken(address _token) external onlyAllowed {
         require(_token != address(0));
         uint i = 0;
         for(i; i < defaultRewardToken.length; i++){
