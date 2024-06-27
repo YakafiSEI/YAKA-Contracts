@@ -83,9 +83,19 @@ module.exports = {
   },
 
   etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: APIKEY
+    apiKey: {
+      sei_test: "0e0cb6ed-15c4-44fd-bc37-2740ed4f0104"
+    },
+    customChains: [
+      {
+        network: "sei_test",
+        chainId: 1328,
+        urls: {
+          apiURL: "https://seitrace.com/atlantic-2/api",
+          browserURL: "https://seitrace.com"
+        }
+      }
+    ]
   },
 
   mocha: {
