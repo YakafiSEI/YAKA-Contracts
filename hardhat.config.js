@@ -5,7 +5,7 @@ require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-web3");
 
-const { PRIVATEKEY, APIKEY } = require("./pvkey.js")
+const { PRIVATEKEY, APIKEY,PRIVATEKEY_MAINNEET } = require("./pvkey.js")
 
 module.exports = {
   // latest Solidity version
@@ -73,6 +73,13 @@ module.exports = {
       accounts: PRIVATEKEY,
       allowUnlimitedContractSize: true
     },
+    sei_main : {
+      url: "https://evm-rpc.sei-apis.com",
+      timeout: 60000,
+      chainId: 1329,
+      accounts: PRIVATEKEY_MAINNEET,
+      allowUnlimitedContractSize: true
+    },
     sepolia : {
       url: "https://eth-sepolia.g.alchemy.com/v2/BrzpjuiAd7D6jCuR3FXfB0LH_A5ClzsD",
       chainId: 11155111,
@@ -84,14 +91,14 @@ module.exports = {
 
   etherscan: {
     apiKey: {
-      sei_test: "0e0cb6ed-15c4-44fd-bc37-2740ed4f0104"
+      sei_main: "0e0cb6ed-15c4-44fd-bc37-2740ed4f0104"
     },
     customChains: [
       {
-        network: "sei_test",
-        chainId: 1328,
+        network: "sei_main",
+        chainId: 1329,
         urls: {
-          apiURL: "https://seitrace.com/atlantic-2/api",
+          apiURL: "https://seitrace.com/pacific-1/api",
           browserURL: "https://seitrace.com"
         }
       }

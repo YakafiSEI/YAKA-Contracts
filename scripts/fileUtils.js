@@ -23,5 +23,5 @@ module.exports = {
             throw error;
         }
     },
-    deployPath: "/Users/carlos/WorkSpace/DaoProject/YAKA-Contracts/scripts/contracts.json"
+    deployPath: "/Users/carlos/WorkSpace/DaoProject/YAKA-Contracts/scripts/contracts_mainnet.json"
 }
